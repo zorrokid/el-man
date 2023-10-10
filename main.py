@@ -1,11 +1,11 @@
 import os
+import sys
 import requests
 import datetime
 
 TOKEN = os.environ.get('TOKEN')
 API_URL = 'https://web-api.tp.entsoe.eu/api'
-EIC_CODE_IN = '10YFI-1--------U'
-EIC_CODE_OUT = '10YFI-1--------U'
+EIC_CODE = '10YFI-1--------U'
 
 
 def get_data(url):
@@ -35,9 +35,9 @@ def get_data(url):
 #   &periodEnd=201612312300
 
 
-def get_url(date_from: datetime, date_to: datetime, eic_code_in=EIC_CODE_IN, eic_code_out=EIC_CODE_OUT):
-    url = API_URL + '?documentType=A44' + '&in_Domain=' + eic_code_in + '&out_Domain=' + \
-        eic_code_out + '&periodStart=' + date_to_url(date_from) + \
+def get_url(date_from: datetime, date_to: datetime, eic_code):
+    url = API_URL + '?documentType=A44' + '&in_Domain=' + eic_code + '&out_Domain=' + \
+        eic_code + '&periodStart=' + date_to_url(date_from) + \
         '&periodEnd=' + \
         date_to_url(date_to) + '&securityToken=' + TOKEN
     return url
@@ -52,10 +52,16 @@ if __name__ == '__main__':
         print("Please set TOKEN environment variable")
         exit(1)
 
+    # read command line argument for Domain EIC Code
+    if len(sys.argv) > 1:
+       eic_code = sys.argv[1]
+    else:
+        eic_code = EIC_CODE
+
     date_from = datetime.datetime.now()
     date_to = date_from + datetime.timedelta(days=1)
 
-    url = get_url(date_from, date_to)
+    url = get_url(date_from, date_to, eic_code)
     data = get_data(url)
     if data:
         print(data)
