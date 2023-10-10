@@ -2,11 +2,13 @@ import os
 import sys
 import requests
 import datetime
+import xml.etree.ElementTree as ET
 
 TOKEN = os.environ.get('TOKEN')
 API_URL = 'https://web-api.tp.entsoe.eu/api'
 EIC_CODE = '10YFI-1--------U'
 
+XML_NAMESPACE = '{urn:iec62325.351:tc57wg16:451-3:publicationdocument:7:0}' 
 
 def get_data(url):
     r = requests.get(url)
@@ -46,6 +48,8 @@ def get_url(date_from: datetime, date_to: datetime, eic_code):
 def date_to_url(date: datetime):
     return date.strftime("%Y%m%d%H00")
 
+def with_xml_namespace(tag):
+    return XML_NAMESPACE + tag
 
 if __name__ == '__main__':
     if (TOKEN is None):
@@ -63,5 +67,21 @@ if __name__ == '__main__':
 
     url = get_url(date_from, date_to, eic_code)
     data = get_data(url)
-    if data:
-        print(data)
+    root = ET.fromstring(data)
+    # tree = ET.parse('./example_data/example_result.xml')
+    # root = tree.getroot()
+
+    # find period tags inside timeseries
+    key = ".//{0}Period".format(XML_NAMESPACE)
+
+    for period in root.findall(key):
+        interval = period.find(with_xml_namespace("timeInterval"))
+        start = interval.find(with_xml_namespace("start"))
+        end = interval.find(with_xml_namespace("end"))
+        print("Start: ", start.text)
+        print("End: ", end.text)
+        for point in period.iter(with_xml_namespace('Point')):
+            position = point.find(with_xml_namespace('position'))
+            price = point.find(with_xml_namespace('price.amount'))
+            print("Position: ", position.text)
+            print("Price: ", price.text)
