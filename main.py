@@ -2,8 +2,8 @@ import os
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
-from entso_e_data_parser import EntsoEDataParser
-from entso_e_data_fetcher import EntsoEDataFetcher
+from entso_e.entso_e_data_parser import EntsoEDataParser
+from entso_e.entso_e_data_fetcher import EntsoEDataFetcher
 
 TOKEN = os.environ.get('TOKEN')
 
