@@ -25,4 +25,4 @@ if __name__ == '__main__':
         data = get_online_data(token, eic_code)
 
     prices = EntsoEDataParser(data).parse_dayahead_prices(vat_percentage, utc_diff)
-    price_processor = PriceProcessor(prices).print()
+    PriceProcessor(prices).print()
