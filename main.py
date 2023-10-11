@@ -2,8 +2,8 @@ import os
 import sys
 from entso_e.entso_e_data_parser import EntsoEDataParser
 from entso_e.entso_e_data_fetcher import EntsoEDataFetcher
-from arg_parser import ArgParser
-from price_processor import PriceProcessor
+from util.arg_parser import ArgParser
+from util.price_processor import PriceProcessor
 
 def get_local_data():
     data = open('./example_data/example_result.xml', 'r').read()
