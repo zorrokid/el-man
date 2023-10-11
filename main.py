@@ -13,11 +13,6 @@ def get_online_data(token, eic_code):
     data_fetcher = EntsoEDataFetcher(token)
     return data_fetcher.get_data(eic_code)
 
-def print_prices(prices):
-    for price in prices:
-        print("Time: ", price.time)
-        print("Price: {0} c/kWh".format(price.price))
-
 if __name__ == '__main__':
     token = os.environ.get('TOKEN')
     if (token is None):
