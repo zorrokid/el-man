@@ -1,53 +1,13 @@
 import os
 import sys
-import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
-from models.price import Price
 from entso_e_data_parser import EntsoEDataParser
+from entso_e_data_fetcher import EntsoEDataFetcher
 
 TOKEN = os.environ.get('TOKEN')
-API_URL = 'https://web-api.tp.entsoe.eu/api'
+
 EIC_CODE = '10YFI-1--------U'
-
-
-def get_data(url):
-    r = requests.get(url)
-    if r.status_code != 200:
-        error = r.text
-        print("Error fetching data from the API", error)
-        return None
-    return r.text
-
-# Entso-E 4.2.10. Day Ahead Prices [12.1.D]
-#    One year range limit applies
-#    Minimum time interval in query response is one day
-#    Mandatory parameters
-#        DocumentType
-#        In_Domain
-#        Out_Domain
-#        TimeInterval or combination of PeriodStart and PeriodEnd
-#    In_Domain and Out_Domain must be populated with the same area EIC code
-#
-# example:
-#   GET /api?
-#   documentType=A44&
-#   in_Domain=10YCZ-CEPS-----N
-#   &out_Domain=10YCZ-CEPS-----N
-#   &periodStart=201512312300
-#   &periodEnd=201612312300
-
-
-def get_url(date_from: datetime, date_to: datetime, eic_code):
-    url = API_URL + '?documentType=A44' + '&in_Domain=' + eic_code + '&out_Domain=' + \
-        eic_code + '&periodStart=' + date_to_url(date_from) + \
-        '&periodEnd=' + \
-        date_to_url(date_to) + '&securityToken=' + TOKEN
-    return url
-
-def date_to_url(date: datetime):
-    return date.strftime("%Y%m%d%H00")
-
 
 def get_local_data():
     tree = ET.parse('./example_data/example_result.xml')
@@ -57,10 +17,8 @@ def get_local_data():
 def get_online_data(eic_code):
     date_from = datetime.now()
     date_to = date_from + timedelta(days=1)
-    url = get_url(date_from, date_to, eic_code)
-    data = get_data(url)
-    root = ET.fromstring(data)
-    return root
+    data_fetcher = EntsoEDataFetcher(TOKEN)
+    return data_fetcher.get_data(date_from, date_to, eic_code)
 
 def print_prices(prices):
     for price in prices:
@@ -97,9 +55,10 @@ if __name__ == '__main__':
         use_local_data = False
 
     if use_local_data:
-        root = get_local_data() 
+        data = get_local_data() 
     else:
-        root = get_online_data(eic_code)
+        data = get_online_data(eic_code)
+        root = ET.fromstring(data)
 
     parser = EntsoEDataParser(root)
     prices = parser.parse_data(root, vat_percentage, utc_diff)
