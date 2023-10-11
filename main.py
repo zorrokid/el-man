@@ -3,6 +3,7 @@ import sys
 import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
+from models.price import Price
 
 TOKEN = os.environ.get('TOKEN')
 API_URL = 'https://web-api.tp.entsoe.eu/api'
@@ -44,12 +45,76 @@ def get_url(date_from: datetime, date_to: datetime, eic_code):
         date_to_url(date_to) + '&securityToken=' + TOKEN
     return url
 
-
 def date_to_url(date: datetime):
     return date.strftime("%Y%m%d%H00")
 
 def with_xml_namespace(tag):
     return XML_NAMESPACE + tag
+
+def get_local_data():
+    tree = ET.parse('./example_data/example_result.xml')
+    root = tree.getroot()
+    return root
+
+def get_online_data(eic_code):
+    date_from = datetime.now()
+    date_to = date_from + timedelta(days=1)
+    url = get_url(date_from, date_to, eic_code)
+    data = get_data(url)
+    root = ET.fromstring(data)
+    return root
+
+def parse_data(root, vat_percentage, utc_diff):
+    # find period tags inside timeseries
+    key = ".//{0}Period".format(XML_NAMESPACE)
+    prices = []
+    for period in root.findall(key):
+        parse_period_data(period, vat_percentage, utc_diff)
+        prices += parse_period_data(period, vat_percentage, utc_diff)
+    return prices
+    
+def parse_period_data(period, vat_percentage, utc_diff):
+    interval = period.find(with_xml_namespace("timeInterval"))
+    start = interval.find(with_xml_namespace("start"))
+    start_time = datetime.fromisoformat(start.text) + timedelta(hours=utc_diff)
+    prices = []
+    for point in period.iter(with_xml_namespace('Point')):
+        parse_point_data(point, start_time, vat_percentage)
+        price = parse_point_data(point, start_time, vat_percentage)
+        prices.append(price)
+    return prices
+
+def parse_point_data(point, start_time, vat_percentage):
+    current_time = point_to_time(point, start_time) 
+    price_euros_mwh = point_to_price(point) 
+    price_cents_kwh = price_to_cents_kwh(price_euros_mwh)
+    price_cents_kwh_with_vat = price_with_vat(price_cents_kwh, vat_percentage) 
+    price = Price(current_time, price_cents_kwh_with_vat)
+    return price 
+
+def point_to_price(point):
+    price_element = point.find(with_xml_namespace('price.amount'))
+    price_euros_mwh = float(price_element.text)
+    return price_euros_mwh
+
+def point_to_time(point, start_time):
+    position_element = point.find(with_xml_namespace('position'))
+    position = int(position_element.text)
+    current_time = start_time + timedelta(hours=position-1) 
+    return current_time
+
+def price_to_cents_kwh(price_mwh):
+    price_kwh = price_mwh / 1000
+    price_cents_kwh = price_kwh * 100
+    return price_cents_kwh
+
+def price_with_vat(price, vat_percentage):
+    return price * (1 + vat_percentage / 100)
+
+def print_prices(prices):
+    for price in prices:
+        print("Time: ", price.time)
+        print("Price: {0} c/kWh".format(price.price))
 
 if __name__ == '__main__':
     if (TOKEN is None):
@@ -80,35 +145,11 @@ if __name__ == '__main__':
     else:
         use_local_data = False
 
-
     if use_local_data:
-        tree = ET.parse('./example_data/example_result.xml')
-        root = tree.getroot()
+        root = get_local_data() 
     else:
-        date_from = datetime.now()
-        date_to = date_from + timedelta(days=1)
+        root = get_online_data(eic_code)
 
-        url = get_url(date_from, date_to, eic_code)
-        data = get_data(url)
-        root = ET.fromstring(data)
+    prices = parse_data(root, vat_percentage, utc_diff)
+    print_prices(prices)
 
-    # find period tags inside timeseries
-    key = ".//{0}Period".format(XML_NAMESPACE)
-
-    for period in root.findall(key):
-        interval = period.find(with_xml_namespace("timeInterval"))
-        start = interval.find(with_xml_namespace("start"))
-        end = interval.find(with_xml_namespace("end"))
-        start_time = datetime.fromisoformat(start.text) + timedelta(hours=utc_diff)
-        end_time = datetime.fromisoformat(end.text) + timedelta(hours=utc_diff)
-        for point in period.iter(with_xml_namespace('Point')):
-            position_element = point.find(with_xml_namespace('position'))
-            position = int(position_element.text)
-            current_time = start_time + timedelta(hours=position-1) 
-            price_element = point.find(with_xml_namespace('price.amount'))
-            price_euros_mwh = float(price_element.text)
-            price_euros_kwh = price_euros_mwh / 1000
-            price_cents_kwh = price_euros_kwh * 100
-            price_cents_kwh_with_vat = price_cents_kwh * (1 + vat_percentage / 100)
-            print("Time: ", current_time)
-            print("Price: {0} c/kWh".format(price_cents_kwh_with_vat))
