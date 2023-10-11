@@ -2,7 +2,19 @@
 
 This application is for managing electricity feeding based on electricity prices.
 
-The Day Ahead prices are fetched from [ENTSO-E Transparency Platorm](https://transparency.entsoe.eu/)
+Currently implemented:
+- fetching day ahead prices from [ENTSO-E Transparency Platorm](https://transparency.entsoe.eu/)
+- parsing day ahead prices from response data
+
+TODO:
+- create a cloud function to fetch prices on daily basis
+    - function stores results to cloud database
+- create an app to fetch prices and settings from cloud database
+    - app sets registered devices on / off based on hourly electricity price and price limits from settings
+
+# Usage
+
+You need a token to access the [ENTSO-E Transparency Platform RESTful API](https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html)
 
 Export the token as an environment variable
 
@@ -11,7 +23,6 @@ export TOKEN=<token>
 ```
 
 Usage is:
-https://github.com/zorrokid/el-man
 ```bash
 python3 main.py <EIC code of the area> <vat percentage> <UTC time difference in hours> 
 ```
