@@ -7,17 +7,6 @@ class EntsoEDataFetcher:
     def __init__(self, token):
         self.token = token 
 
-    def get_dayahead_data(self, eic_code):
-        date_from = datetime.now()
-        date_to = date_from + timedelta(days=1)
-        url = self.get_url(date_from, date_to, eic_code)
-        r = requests.get(url)
-        if r.status_code != 200:
-            error = r.text
-            print("Error fetching data from the API", error)
-            return None
-        return r.text
-
     # Entso-E 4.2.10. Day Ahead Prices [12.1.D]
     #    One year range limit applies
     #    Minimum time interval in query response is one day
@@ -35,6 +24,17 @@ class EntsoEDataFetcher:
     #   &out_Domain=10YCZ-CEPS-----N
     #   &periodStart=201512312300
     #   &periodEnd=201612312300
+
+    def get_dayahead_data(self, eic_code):
+        date_from = datetime.now()
+        date_to = date_from + timedelta(days=1)
+        url = self.get_url(date_from, date_to, eic_code)
+        r = requests.get(url)
+        if r.status_code != 200:
+            error = r.text
+            print("Error fetching data from the API", error)
+            return None
+        return r.text
 
     def date_to_url(self, date: datetime):
         return date.strftime("%Y%m%d%H00")
