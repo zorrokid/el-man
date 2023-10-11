@@ -55,7 +55,7 @@ if __name__ == '__main__':
         use_local_data = False
 
     if use_local_data:
-        data = get_local_data() 
+        root = get_local_data() 
     else:
         data = get_online_data(eic_code)
         root = ET.fromstring(data)
