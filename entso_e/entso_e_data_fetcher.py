@@ -1,5 +1,5 @@
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 
 API_URL = 'https://web-api.tp.entsoe.eu/api'
 
@@ -7,7 +7,9 @@ class EntsoEDataFetcher:
     def __init__(self, token):
         self.token = token 
 
-    def get_data(self, date_from: datetime, date_to: datetime, eic_code):
+    def get_data(self, eic_code):
+        date_from = datetime.now()
+        date_to = date_from + timedelta(days=1)
         url = self.get_url(date_from, date_to, eic_code)
         r = requests.get(url)
         if r.status_code != 200:

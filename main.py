@@ -1,7 +1,5 @@
 import os
 import sys
-import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
 from entso_e.entso_e_data_parser import EntsoEDataParser
 from entso_e.entso_e_data_fetcher import EntsoEDataFetcher
 
@@ -10,15 +8,12 @@ TOKEN = os.environ.get('TOKEN')
 EIC_CODE = '10YFI-1--------U'
 
 def get_local_data():
-    tree = ET.parse('./example_data/example_result.xml')
-    root = tree.getroot()
-    return root
+    data = open('./example_data/example_result.xml', 'r').read()
+    return data
 
 def get_online_data(eic_code):
-    date_from = datetime.now()
-    date_to = date_from + timedelta(days=1)
     data_fetcher = EntsoEDataFetcher(TOKEN)
-    return data_fetcher.get_data(date_from, date_to, eic_code)
+    return data_fetcher.get_data(eic_code)
 
 def print_prices(prices):
     for price in prices:
@@ -55,12 +50,11 @@ if __name__ == '__main__':
         use_local_data = False
 
     if use_local_data:
-        root = get_local_data() 
+        data = get_local_data() 
     else:
         data = get_online_data(eic_code)
-        root = ET.fromstring(data)
 
-    parser = EntsoEDataParser(root)
-    prices = parser.parse_data(root, vat_percentage, utc_diff)
+    parser = EntsoEDataParser(data)
+    prices = parser.parse_data(vat_percentage, utc_diff)
     print_prices(prices)
 

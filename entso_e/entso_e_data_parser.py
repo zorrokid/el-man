@@ -1,16 +1,18 @@
 from datetime import datetime, timedelta
 from models.price import Price
+import xml.etree.ElementTree as ET
 
 XML_NAMESPACE = '{urn:iec62325.351:tc57wg16:451-3:publicationdocument:7:0}' 
 
 class EntsoEDataParser:
-    def __init__(self, root_element):
-        self.root_element = root_element
+    def __init__(self, data):
+        self.data = data 
 
     def with_xml_namespace(self, tag):
         return XML_NAMESPACE + tag
 
-    def parse_data(self, root, vat_percentage, utc_diff):
+    def parse_data(self, vat_percentage, utc_diff):
+        root = ET.fromstring(self.data)
         # find period tags inside timeseries
         key = ".//{0}Period".format(XML_NAMESPACE)
         prices = []
