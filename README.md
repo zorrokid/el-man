@@ -11,15 +11,15 @@ export TOKEN=<token>
 ```
 
 Usage is:
-
+https://github.com/zorrokid/el-man
 ```bash
 python3 main.py <EIC code of the area> <vat percentage> <UTC time difference in hours> 
 ```
 
 Arguments are optional, default values are for Finland:
-EIC code: 10YFI-1--------U
-VAT percentage: 24
-UTC time difference: 3
+- EIC code: 10YFI-1--------U
+- VAT percentage: 24
+- UTC time difference: 3
 
 For example:
 
