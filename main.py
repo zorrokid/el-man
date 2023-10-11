@@ -6,12 +6,10 @@ from util.arg_parser import ArgParser
 from util.price_processor import PriceProcessor
 
 def get_local_data():
-    data = open('./example_data/example_result.xml', 'r').read()
-    return data
+    return open('./example_data/example_result.xml', 'r').read()
 
 def get_online_data(token, eic_code):
-    data_fetcher = EntsoEDataFetcher(token)
-    return data_fetcher.get_data(eic_code)
+    return EntsoEDataFetcher(token).get_dayahead_data(eic_code)
 
 if __name__ == '__main__':
     token = os.environ.get('TOKEN')
@@ -19,15 +17,12 @@ if __name__ == '__main__':
         print("Please set TOKEN environment variable")
         exit(1)
 
-    arg_parser = ArgParser(sys.argv)
-    eic_code, utc_diff, vat_percentage, use_local_data = arg_parser.parse()
+    eic_code, utc_diff, vat_percentage, use_local_data = ArgParser(sys.argv).parse()
 
     if use_local_data:
         data = get_local_data() 
     else:
         data = get_online_data(token, eic_code)
 
-    parser = EntsoEDataParser(data)
-    prices = parser.parse_data(vat_percentage, utc_diff)
-    price_processor = PriceProcessor(prices)
-    price_processor.process()
+    prices = EntsoEDataParser(data).parse_dayahead_prices(vat_percentage, utc_diff)
+    price_processor = PriceProcessor(prices).print()

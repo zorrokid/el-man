@@ -7,7 +7,7 @@ class EntsoEDataFetcher:
     def __init__(self, token):
         self.token = token 
 
-    def get_data(self, eic_code):
+    def get_dayahead_data(self, eic_code):
         date_from = datetime.now()
         date_to = date_from + timedelta(days=1)
         url = self.get_url(date_from, date_to, eic_code)

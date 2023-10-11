@@ -11,7 +11,7 @@ class EntsoEDataParser:
     def with_xml_namespace(self, tag):
         return XML_NAMESPACE + tag
 
-    def parse_data(self, vat_percentage, utc_diff):
+    def parse_dayahead_prices(self, vat_percentage, utc_diff):
         root = ET.fromstring(self.data)
         # find period tags inside timeseries
         key = ".//{0}Period".format(XML_NAMESPACE)
