@@ -10,6 +10,7 @@ TODO:
 - create a cloud function to fetch prices on daily basis
     - function stores results to cloud database
 - create an app to fetch prices and settings from cloud database
+    - configuring devices (IP's of devices)
     - app sets registered devices on / off based on hourly electricity price and price limits from settings
 
 # Usage
@@ -42,4 +43,23 @@ There is also an example file if you don't have access to Entso-E API. Example d
 
 ```bash
 python3 main.py <EIC code of the area> <vat percentage> <UTC time difference in hours> debug
+```
+
+# Shelly Plug-S
+
+Device can be connected to Wi-Fi using Shelly app (select device > networks > Wi-Fi 1/2 > Enable > enter Wi-Fi credentials).
+
+You get device IP from there.
+
+Example requests:
+
+```
+curl http://192.168.1.105/relay/0?turn=on
+curl http://192.168.1.105/relay/0?turn=off
+```
+
+Example response:
+
+```json
+{"ison":false,"has_timer":false,"timer_started":0,"timer_duration":0,"timer_remaining":0,"overpower":false,"source":"http"}
 ```
