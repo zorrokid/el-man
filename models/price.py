@@ -1,4 +1,7 @@
+from dataclasses import dataclass
+from datetime import datetime
+
+@dataclass
 class Price:
-    def __init__(self, time, price):
-        self.time = time
-        self.price = price
+    time: datetime
+    price: float
