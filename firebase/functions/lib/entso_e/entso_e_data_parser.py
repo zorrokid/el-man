@@ -1,5 +1,11 @@
 from datetime import datetime, timedelta
-from models.price import Price
+from typing import List
+# How do I import Price from models/price.py?
+# I tried:
+from lib.entso_e.models.price import Price
+# However, I got the following error:
+# ModuleNotFoundError: No module named 'models'
+
 import xml.etree.ElementTree as ET
 
 XML_NAMESPACE = '{urn:iec62325.351:tc57wg16:451-3:publicationdocument:7:0}' 
@@ -11,7 +17,7 @@ class EntsoEDataParser:
     def with_xml_namespace(self, tag):
         return XML_NAMESPACE + tag
 
-    def parse_dayahead_prices(self, vat_percentage, utc_diff):
+    def parse_dayahead_prices(self, vat_percentage, utc_diff) -> List[Price]:
         root = ET.fromstring(self.data)
         # find period tags inside timeseries
         key = ".//{0}Period".format(XML_NAMESPACE)

@@ -25,7 +25,7 @@ class EntsoEDataFetcher:
     #   &periodStart=201512312300
     #   &periodEnd=201612312300
 
-    def get_dayahead_data(self, eic_code):
+    def get_dayahead_data(self, eic_code) -> str:
         date_from = datetime.now()
         date_to = date_from + timedelta(days=1)
         url = self.get_url(date_from, date_to, eic_code)
@@ -36,10 +36,10 @@ class EntsoEDataFetcher:
             return None
         return r.text
 
-    def date_to_url(self, date: datetime):
+    def date_to_url(self, date: datetime) -> str:
         return date.strftime("%Y%m%d%H00")
 
-    def get_url(self, date_from: datetime, date_to: datetime, eic_code):
+    def get_url(self, date_from: datetime, date_to: datetime, eic_code) -> str:
         url = API_URL + '?documentType=A44' + '&in_Domain=' + eic_code + '&out_Domain=' + \
             eic_code + '&periodStart=' + self.date_to_url(date_from) + \
             '&periodEnd=' + \
