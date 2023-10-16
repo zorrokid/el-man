@@ -63,3 +63,19 @@ Example response:
 ```json
 {"ison":false,"has_timer":false,"timer_started":0,"timer_duration":0,"timer_remaining":0,"overpower":false,"source":"http"}
 ```
+
+# Adax API
+https://api-1.adax.no/client-api/
+https://api-1.adax.no/client-api/openapi
+
+# Python virtual environment
+
+To create:
+```bash
+ python3 -m venv .venv
+```
+
+To activate: 
+```bash
+ source .venv/bin/activate
+```
