@@ -1,7 +1,7 @@
 import os
 import sys
-from entso_e.entso_e_data_parser import EntsoEDataParser
-from entso_e.entso_e_data_fetcher import EntsoEDataFetcher
+from firebase.functions.lib.entso_e.entso_e_data_parser import EntsoEDataParser
+from firebase.functions.lib.entso_e.entso_e_data_fetcher import EntsoEDataFetcher
 from util.arg_parser import parse_args 
 
 def get_local_data():
