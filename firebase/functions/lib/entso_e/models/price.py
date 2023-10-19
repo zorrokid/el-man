@@ -7,4 +7,8 @@ class Price:
     price: float
 
     def get_price_key(self):
-        return self.time.strftime("%Y%m%d%H%M")
+        return self.create_price_key(self.price)
+
+    @staticmethod
+    def create_price_key(time: datetime):
+        return time.strftime("%Y%m%d%H%M") 
