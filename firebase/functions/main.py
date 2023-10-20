@@ -11,7 +11,6 @@ from datetime import datetime
 
 from lib.entso_e.models.price import Price
 
-
 ENTSO_E_TOKEN = SecretParam("ENTSO_E_TOKEN")
 EIC_CODE = StringParam('EIC_CODE') # '10YFI-1--------U'
 VAT_PERCENTAGE = IntParam("VAT_PERCENTAGE") # 24
@@ -21,8 +20,11 @@ ADAX_API_CREDENTIALS = SecretParam("ADAX_API_CREDENTIALS")
 ADAX_CLIENT_ID = StringParam("ADAX_CLIENT_ID")
 
 PRICES_COLLECTION = "DayAheadPrices"
+HOUSE_INFO_COLLECTION = "HouseInfo"
 
 DAYAHEAD_PRICE_FETCH_SCHDULE = "every day 19:40"
+
+initialize_app()
 
 @scheduler_fn.on_schedule(schedule=DAYAHEAD_PRICE_FETCH_SCHDULE, region="europe-central2", secrets=[ENTSO_E_TOKEN])
 def fetch_day_ahead_prices(req: https_fn.Request) -> None:
@@ -65,6 +67,29 @@ def get_house_info(req: https_fn.Request) -> https_fn.Response:
     if status_code != 200:
         return https_fn.Response("Error getting house info", status_code)
 
+    db = firestore.client()
+
+    homes = house_info['homes']
+    for home in homes:
+        homeId = str(home['id'])
+        docref = db.collection(HOUSE_INFO_COLLECTION).document(homeId)
+        docref.set(home)
+
+    rooms = house_info['rooms']
+    for room in rooms:
+        roomId = str(room['id'])
+        homeId = str(room['homeId'])
+        docref = db.collection(HOUSE_INFO_COLLECTION).document(homeId).collection("rooms").document(roomId)
+        docref.set(room)
+
+    devices = house_info['devices']
+    for device in devices:
+        homeId = str(device['homeId'])
+        roomId = str(device['roomId'])
+        deviceId = str(device['id'])
+        docref = db.collection(HOUSE_INFO_COLLECTION).document(homeId).collection("rooms").document(roomId).collection("devices").document(deviceId)
+        docref.set(device)
+ 
     print_house_info(house_info)
     return https_fn.Response(json.dumps(house_info))
 
