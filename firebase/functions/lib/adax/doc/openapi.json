@@ -1,0 +1,266 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Adax API",
+        "version": "1"
+    },
+    "paths": {
+        "/v1/content": {
+            "get": {
+                "summary": "Get user content",
+                "operationId": "getContent",
+                "responses": {
+                    "default": {
+                        "description": "Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ContentResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters"
+                    },
+                    "401": {
+                        "description": "Invalid authorization"
+                    },
+                    "402": {
+                        "description": "Authorization expired"
+                    }
+                },
+                "security": [
+                    {
+                        "remoteUserServiceSecurity": []
+                    }
+                ]
+            }
+        },
+        "/v1/control": {
+            "post": {
+                "summary": "Controls user objects",
+                "operationId": "control",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ControlRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "default": {
+                        "description": "Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ControlResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters"
+                    },
+                    "401": {
+                        "description": "Invalid authorization"
+                    },
+                    "402": {
+                        "description": "Authorization expired"
+                    }
+                },
+                "security": [
+                    {
+                        "remoteUserServiceSecurity": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ContentResponse": {
+                "type": "object",
+                "properties": {
+                    "homes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Home"
+                        }
+                    },
+                    "rooms": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Room"
+                        }
+                    },
+                    "devices": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Device"
+                        }
+                    }
+                }
+            },
+            "Device": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "homeId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "roomId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Device Name."
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/DeviceType"
+                    }
+                }
+            },
+            "DeviceType": {
+                "type": "string",
+                "description": "Device type.",
+                "enum": [
+                    "Heater"
+                ]
+            },
+            "Home": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Home name."
+                    }
+                }
+            },
+            "Room": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "homeId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Room name."
+                    },
+                    "heatingEnabled": {
+                        "type": "boolean",
+                        "description": "Heating is on/off.",
+                        "nullable": true
+                    },
+                    "targetTemperature": {
+                        "maximum": 3500,
+                        "minimum": 500,
+                        "type": "integer",
+                        "description": "Target temperature. Degrees Celsius x 100 units.",
+                        "format": "int32",
+                        "nullable": true
+                    },
+                    "temperature": {
+                        "maximum": 3500,
+                        "minimum": 500,
+                        "type": "integer",
+                        "description": "Current temperature. Degrees Celsius x 100 units.",
+                        "format": "int32",
+                        "nullable": true
+                    }
+                }
+            },
+            "ControlResponse": {
+                "type": "object",
+                "properties": {
+                    "rooms": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ControlResponseRoom"
+                        }
+                    }
+                }
+            },
+            "ControlResponseRoom": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/ControlStatus"
+                    }
+                }
+            },
+            "ControlStatus": {
+                "type": "string",
+                "description": "Control status.",
+                "enum": [
+                    "OK",
+                    "NoAccess",
+                    "InvalidParams",
+                    "InternalError"
+                ]
+            },
+            "ControlRequest": {
+                "type": "object",
+                "properties": {
+                    "rooms": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ControlRequestRoom"
+                        }
+                    }
+                }
+            },
+            "ControlRequestRoom": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "heatingEnabled": {
+                        "type": "boolean",
+                        "description": "Set heating on/off."
+                    },
+                    "targetTemperature": {
+                        "maximum": 3500,
+                        "minimum": 500,
+                        "type": "integer",
+                        "description": "Set target temperature. Degrees Celsius x 100 units; Ignored if heatingEnabled is false.",
+                        "format": "int32"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "remoteUserServiceSecurity": {
+                "type": "oauth2",
+                "flows": {
+                    "password": {
+                        "tokenUrl": "https://api-1.adax.no/client-api/auth/token"
+                    }
+                }
+            }
+        }
+    }
+}
