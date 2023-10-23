@@ -17,7 +17,7 @@ VAT_PERCENTAGE = IntParam("VAT_PERCENTAGE") # 24
 UTC_DIFF = IntParam("UTC_DIFF") # 3
 
 ADAX_API_CREDENTIALS = SecretParam("ADAX_API_CREDENTIALS")
-ADAX_CLIENT_ID = StringParam("ADAX_CLIENT_ID")
+ADAX_CLIENT_ID = SecretParam("ADAX_CLIENT_ID")
 
 PRICES_COLLECTION = "DayAheadPrices"
 HOUSE_INFO_COLLECTION = "HouseInfo"
@@ -43,26 +43,45 @@ def fetch_day_ahead_prices(req: https_fn.Request) -> None:
 
 EVERY_HOUR = "0 * * * *"
 
-@scheduler_fn.on_schedule(schedule=EVERY_HOUR, region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
-def set_heaters(req: https_fn.Request) -> None:
-    print("Starting set_heaters")
-    now = datetime.datetime.now()
-    key = Price.create_price_key(now)
+# @scheduler_fn.on_schedule(schedule=EVERY_HOUR, region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
+# def set_heaters(req: https_fn.Request) -> None:
+#     print("Starting set_heaters")
+#     now = datetime.datetime.now()
+#     key = Price.create_price_key(now)
+#     db = firestore.client()
+#     price_ref = db.collection(PRICES_COLLECTION).document(key)
+#     doc = price_ref.get()
+# 
+#     if doc.exists:
+#         price = float(doc.to_dict()['price'])
+#         print(f"Price for {key} is {price} ")
+# 
+#     print("Finished set_heaters")
+
+@https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
+def set_heating_enabled(req: https_fn.Request) -> https_fn.Response:
+    enabled = req.args.get('enabled') == 'true'
+    house_id = req.args.get('house_id')
+    if house_id is None:
+        return https_fn.Response("Missing house_id", 400)
+    client = AdaxClient(ADAX_API_CREDENTIALS.value, ADAX_CLIENT_ID.value)
+    token = client.get_token()
+    # get rooms from firestore
     db = firestore.client()
-    price_ref = db.collection(PRICES_COLLECTION).document(key)
-    doc = price_ref.get()
+    rooms = db.collection(HOUSE_INFO_COLLECTION).document(house_id).collection("rooms").stream()
 
-    if doc.exists:
-        price = float(doc.to_dict()['price'])
-        print(f"Price for {key} is {price} ")
+    # set target temperature to 0 for all rooms
+    for roomDoc in rooms:
+        roomId = roomDoc.get('id')
+        client.set_heating_enabled(roomId, enabled, token)
 
-    print("Finished set_heaters")
+    return https_fn.Response("OK")
+
 
 @https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
 def get_house_info(req: https_fn.Request) -> https_fn.Response:
     client = AdaxClient(ADAX_API_CREDENTIALS.value, ADAX_CLIENT_ID.value)
     token = client.get_token()
-
     (house_info, status_code) = client.get_house_info(token)
     if status_code != 200:
         return https_fn.Response("Error getting house info", status_code)

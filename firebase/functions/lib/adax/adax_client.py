@@ -25,16 +25,22 @@ class AdaxClient:
         )
         return oauthClinet.access_token
 
-    def set_room_target_temperature(self, roomId, temperature, token):
+    def get_headers(self, token):
+        return { "Authorization": "Bearer " + token }
+
+    def set_heating_enabled(self, roomId, enabled: bool, token) -> bool:
+        json = { 'rooms': [{ 'id': roomId, 'heatingEnabled': str(enabled) }] }
+        response = requests.post(API_URL + '/rest/v1/control/', json = json, headers = self.get_headers(token))
+        return response.status_code == 200
+
+    def set_room_target_temperature(self, roomId, temperature, token) -> bool:
         # Sets target temperature of the room
-        headers = { "Authorization": "Bearer " + token }
         json = { 'rooms': [{ 'id': roomId, 'targetTemperature': str(temperature) }] }
-        response = requests.post(API_URL + '/rest/v1/control/', json = json, headers = headers)
-        print(response)
+        response = requests.post(API_URL + '/rest/v1/control/', json = json, headers = self.get_headers(token))
+        return response.status_code == 200
 
     def get_energy_info(self, token, roomId):
-        headers = { "Authorization": "Bearer " + token }
-        response = requests.get(API_URL + "/rest/v1/energy_log/" + str(roomId), headers = headers)
+        response = requests.get(API_URL + "/rest/v1/energy_log/" + str(roomId), headers = self.get_headers(token))
         json = response.json()
         for log in json['points']:
             fromTime = datetime.utcfromtimestamp(int(log['fromTime']) / 1000)
@@ -43,8 +49,7 @@ class AdaxClient:
             print("From: %15s, To: %15s, %5dwh" % (fromTime, toTime, energy))
 
     def get_house_info(self, token) -> (dict, int):
-        headers = { "Authorization": "Bearer " + token }
-        response = requests.get(API_URL + "/rest/v1/content/?withEnergy=1", headers = headers)
+        response = requests.get(API_URL + "/rest/v1/content/?withEnergy=1", headers = self.get_headers(token))
         if (response.status_code == 200):
             return response.json(), response.status_code
         return None, response.status_code
