@@ -30,10 +30,10 @@ initialize_app()
 def fetch_day_ahead_prices(req: https_fn.Request) -> None:
     _fetch_day_ahead_prices()
 
-@https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
-def fetch_day_ahead_prices_http(req: https_fn.Request) -> https_fn.Response:
-    _fetch_day_ahead_prices() 
-    return https_fn.Response("OK") 
+# @https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
+# def fetch_day_ahead_prices_http(req: https_fn.Request) -> https_fn.Response:
+#     _fetch_day_ahead_prices() 
+#     return https_fn.Response("OK") 
 
 def _fetch_day_ahead_prices():
     print("Fetching day ahead prices...")
@@ -52,15 +52,15 @@ def _fetch_day_ahead_prices():
 EVERY_HOUR = "58 * * * *"
 
 @scheduler_fn.on_schedule(schedule=EVERY_HOUR, region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
-def set_heaters(req: https_fn.Request) -> None:
-    _set_heaters()
+def set_temperatures(req: https_fn.Request) -> None:
+    _set_temperatures()
 
-@https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
-def set_heaters_http(req: https_fn.Request) -> https_fn.Response:
-    _set_heaters()
-    return https_fn.Response("OK") 
+#@https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
+#def set_temperatures_http(req: https_fn.Request) -> https_fn.Response:
+#    _set_temperatures()
+#    return https_fn.Response("OK") 
 
-def _set_heaters():
+def _set_temperatures():
     firestore_client = firestore.client()
     homes = get_homes(firestore_client)
     price = get_price_for_next_hour(firestore_client)
