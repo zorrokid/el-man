@@ -1,10 +1,6 @@
 from datetime import datetime, timedelta
 from typing import List
-# How do I import Price from models/price.py?
-# I tried:
-from lib.entso_e.models.price import Price
-# However, I got the following error:
-# ModuleNotFoundError: No module named 'models'
+from models.price import Price
 
 import xml.etree.ElementTree as ET
 

@@ -1,0 +1,78 @@
+{
+    "homes": [
+        {
+            "id": 458341,
+            "name": "Harjula"
+        }
+    ],
+    "rooms": [
+        {
+            "id": 803951,
+            "homeId": 458341,
+            "name": "Tupa",
+            "heatingEnabled": false,
+            "temperature": 1096
+        },
+        {
+            "id": 803955,
+            "homeId": 458341,
+            "name": "Nurkkakammari",
+            "heatingEnabled": false,
+            "temperature": 1095
+        },
+        {
+            "id": 805480,
+            "homeId": 458341,
+            "name": "Etukammari",
+            "heatingEnabled": false,
+            "temperature": 989
+        }
+    ],
+    "devices": [
+        {
+            "id": 1740925,
+            "homeId": 458341,
+            "roomId": 803951,
+            "name": "Tupa-keitti\u00f6",
+            "type": "Heater",
+            "energyTime": 1698163782970,
+            "energyWh": 0
+        },
+        {
+            "id": 1740932,
+            "homeId": 458341,
+            "roomId": 803951,
+            "name": "Tupa-takapiha",
+            "type": "Heater",
+            "energyTime": 1698163782970,
+            "energyWh": 0
+        },
+        {
+            "id": 1740938,
+            "homeId": 458341,
+            "roomId": 803955,
+            "name": "Nurkkakammari-takapiha",
+            "type": "Heater",
+            "energyTime": 1698163782970,
+            "energyWh": 0
+        },
+        {
+            "id": 1744369,
+            "homeId": 458341,
+            "roomId": 803951,
+            "name": "Tupa p\u00e4\u00e4ty",
+            "type": "Heater",
+            "energyTime": 1698163782970,
+            "energyWh": 0
+        },
+        {
+            "id": 1744544,
+            "homeId": 458341,
+            "roomId": 805480,
+            "name": "Etukammari etupihalle",
+            "type": "Heater",
+            "energyTime": 1698163782970,
+            "energyWh": 0
+        }
+    ]
+}

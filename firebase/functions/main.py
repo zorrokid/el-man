@@ -6,10 +6,13 @@ from lib.adax.adax_client import AdaxClient
 
 from lib.entso_e.entso_e_data_fetcher import EntsoEDataFetcher
 from lib.entso_e.entso_e_data_parser import EntsoEDataParser
+from repositories.prices import get_price_for_next_hour
+from services.constants import HOUSE_INFO_COLLECTION, PRICES_COLLECTION
+
+from services.heater_management import set_target_temperatures
+from repositories.home_repository import get_homes
 
 from datetime import datetime
-
-from lib.entso_e.models.price import Price
 
 ENTSO_E_TOKEN = SecretParam("ENTSO_E_TOKEN")
 EIC_CODE = StringParam('EIC_CODE') # '10YFI-1--------U'
@@ -19,15 +22,20 @@ UTC_DIFF = IntParam("UTC_DIFF") # 3
 ADAX_API_CREDENTIALS = SecretParam("ADAX_API_CREDENTIALS")
 ADAX_CLIENT_ID = SecretParam("ADAX_CLIENT_ID")
 
-PRICES_COLLECTION = "DayAheadPrices"
-HOUSE_INFO_COLLECTION = "HouseInfo"
-
 DAYAHEAD_PRICE_FETCH_SCHDULE = "every day 19:40"
 
 initialize_app()
 
 @scheduler_fn.on_schedule(schedule=DAYAHEAD_PRICE_FETCH_SCHDULE, region="europe-central2", secrets=[ENTSO_E_TOKEN])
 def fetch_day_ahead_prices(req: https_fn.Request) -> None:
+    _fetch_day_ahead_prices()
+
+@https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
+def fetch_day_ahead_prices_http(req: https_fn.Request) -> https_fn.Response:
+    _fetch_day_ahead_prices() 
+    return https_fn.Response("OK") 
+
+def _fetch_day_ahead_prices():
     print("Fetching day ahead prices...")
     data_fetcher = EntsoEDataFetcher(ENTSO_E_TOKEN.value)
     result_str = data_fetcher.get_dayahead_data(EIC_CODE.value)
@@ -35,28 +43,28 @@ def fetch_day_ahead_prices(req: https_fn.Request) -> None:
     prices = data_parser.parse_dayahead_prices(VAT_PERCENTAGE.value, 0)
     db = firestore.client()
     for price in prices:
-        docref = db.collection(PRICES_COLLECTION).document(price.get_price_key())
+        price_key = price.get_price_key()
+        docref = db.collection(PRICES_COLLECTION).document(price_key)
         docref.set({"price" : price.price })
         print(f"Added price {price.price} for {price.get_price_key()}")
-
     print("Finished fetching day ahead prices...")
 
-EVERY_HOUR = "0 * * * *"
+EVERY_HOUR = "58 * * * *"
 
-# @scheduler_fn.on_schedule(schedule=EVERY_HOUR, region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
-# def set_heaters(req: https_fn.Request) -> None:
-#     print("Starting set_heaters")
-#     now = datetime.datetime.now()
-#     key = Price.create_price_key(now)
-#     db = firestore.client()
-#     price_ref = db.collection(PRICES_COLLECTION).document(key)
-#     doc = price_ref.get()
-# 
-#     if doc.exists:
-#         price = float(doc.to_dict()['price'])
-#         print(f"Price for {key} is {price} ")
-# 
-#     print("Finished set_heaters")
+@scheduler_fn.on_schedule(schedule=EVERY_HOUR, region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
+def set_heaters(req: https_fn.Request) -> None:
+    _set_heaters()
+
+@https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
+def set_heaters_http(req: https_fn.Request) -> https_fn.Response:
+    _set_heaters()
+    return https_fn.Response("OK") 
+
+def _set_heaters():
+    firestore_client = firestore.client()
+    homes = get_homes(firestore_client)
+    price = get_price_for_next_hour(firestore_client)
+    set_target_temperatures(homes, price, ADAX_API_CREDENTIALS.value, ADAX_CLIENT_ID.value)
 
 @https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
 def set_heating_enabled(req: https_fn.Request) -> https_fn.Response:
