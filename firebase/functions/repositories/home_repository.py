@@ -7,7 +7,7 @@ from services.constants import DEVICES_COLLECTION, HEATING_SETTINGS_COLLECTION, 
 def store_current_room_state(firestore_client, rooms: List[Room]) -> None:
     utc_unix_time = int(time.time())
     for room in rooms:
-        firestore_client.collection(ROOMS_COLLECTION).document(room.id).collection(ROOM_STATE_COLLECTION).document(utc_unix_time).set({
+        firestore_client.collection(ROOMS_COLLECTION).document(str(room.id)).collection(ROOM_STATE_COLLECTION).document(str(utc_unix_time)).set({
             'id': room.id,
             'homeId': room.homeId,
             'timestamp': utc_unix_time,
@@ -42,7 +42,9 @@ def init_heating_settings(firestore_client) -> None:
 
 def get_heating_settings(firestore_client) -> HeatingSettings:
     # expect only one document currently
-    heating_settings = next(firestore_client.collection(HEATING_SETTINGS_COLLECTION).stream())
+    heating_settings = next(firestore_client.collection(HEATING_SETTINGS_COLLECTION).stream(), None)
+    if heating_settings is None:
+        return get_default_heating_settings()
     return heating_settings_from_dict(heating_settings)
 
 def get_rooms(firestore_client):

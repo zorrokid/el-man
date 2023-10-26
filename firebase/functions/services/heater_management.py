@@ -16,7 +16,7 @@ def set_target_temperatures(rooms: list[Room], price: float, settings: HeatingSe
         if price is None or price > settings.maxPrice:
             print(f"Price is not available or or exceed maximum limit {settings.maxPrice}, so turning heating off")
             client.set_heating_enabled(room.id, False, token)
-        if price < settings.minPrice:
+        if price < settings.lowPrice:
             print(f"Price {price} is lower than min price {settings.minPrice}, so turning heating to max temperature")
             client.set_room_target_temperature(room.id, settings.heatingMaxTemperature * 100, token)
         else:

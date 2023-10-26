@@ -12,6 +12,7 @@ class Room:
 def room_from_dict(source: dict) -> Room:
     return Room(
         source['id'], 
+        source['homeId'],
         source['name'], 
         source['heatingEnabled'], 
         source['temperature'], 

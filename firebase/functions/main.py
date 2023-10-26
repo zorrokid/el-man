@@ -8,7 +8,7 @@ from lib.adax.models.room import room_from_dict
 from repositories.prices import get_price_for_next_hour, store_prices
 from services.day_ahead_prices_service import get_day_ahead_prices
 
-from services.heater_management import get_home_data, print_home_info, set_enabled, set_target_temperatures
+from services.heater_management import get_home_data, set_enabled, set_target_temperatures
 from repositories.home_repository import get_heating_settings, get_rooms, store_current_room_state, store_homes
 
 ENTSO_E_TOKEN = SecretParam("ENTSO_E_TOKEN")
@@ -84,5 +84,4 @@ def get_house_info(req: https_fn.Request) -> https_fn.Response:
     # devices = parse_devices(home_data_json)
     db = firestore.client()
     store_homes(db, home_data_json)
-    print_home_info(home_data_json)
     return https_fn.Response(json.dumps(home_data_json))
