@@ -1,5 +1,5 @@
 import unittest
-from models.device import from_dict
+from models.device import device_from_dict
 
 class DeviceTest(unittest.TestCase):
 
@@ -12,7 +12,7 @@ class DeviceTest(unittest.TestCase):
             'type': 'type'
         }
 
-        device = from_dict(dict)
+        device = device_from_dict(dict)
         self.assertEqual(device.id, 1)
         self.assertEqual(device.name, 'name')
         self.assertEqual(device.energyTime, 1)

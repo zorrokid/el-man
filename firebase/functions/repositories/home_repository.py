@@ -1,30 +1,49 @@
-from models.home import Home
-from models.device import from_dict as device_from_dict
-from models.room import Room
-from services.constants import HOUSE_INFO_COLLECTION
+import time
+from typing import List
+from lib.adax.models.room import Room
+from models.heating_settings import HeatingSettings, get_default_heating_settings, heating_settings_from_dict
+from services.constants import DEVICES_COLLECTION, HEATING_SETTINGS_COLLECTION, HOMES_COLLECTION, ROOM_STATE_COLLECTION, ROOMS_COLLECTION
 
-
-def get_homes(firestore_client) -> list[Home]:
-    homes_list = []
-    home_docs_ref = firestore_client.collection(HOUSE_INFO_COLLECTION)
-    home_docs = home_docs_ref.stream()
-    for home_doc in home_docs:
-        rooms = []
-        room_docs_ref = home_docs_ref.document(home_doc.id).collection("rooms")
-        room_docs = room_docs_ref.stream()
-        for room_doc in room_docs:
-            devices = []
-            devices_stream = room_docs_ref.document(room_doc.id).collection("devices").stream()
-            for device in devices_stream:
-                devices.append(device_from_dict(device.to_dict()))
-            room_dict = room_doc.to_dict()
-            room = Room(room_doc.id, room_dict['name'], room_dict['heatingEnabled'], room_dict['temperature'], devices)
-            rooms.append(room)
-        home_dict = home_doc.to_dict()
-        price_max = home_dict['price_max'] if 'price_max' in home_dict else None
-        home = Home(home_doc.id, home_dict['name'], price_max, rooms)
-        homes_list.append(home)
-    return homes_list
+def store_current_room_state(firestore_client, rooms: List[Room]) -> None:
+    utc_unix_time = int(time.time())
+    for room in rooms:
+        firestore_client.collection(ROOMS_COLLECTION).document(room.id).collection(ROOM_STATE_COLLECTION).document(utc_unix_time).set({
+            'id': room.id,
+            'homeId': room.homeId,
+            'timestamp': utc_unix_time,
+            'temperature': room.temperature,
+            'targetTemperature': room.targetTemperature,
+            'heatingEnabled': room.heatingEnabled,
+        })
         
+def store_homes(firestore_client, home_info):
+    homes = home_info['homes']
+    homes_collection_ref = firestore_client.collection(HOMES_COLLECTION)
+    for home in homes:
+        homes_collection_ref.document(str(home['id'])).set(home)
 
+    rooms_collection_ref = firestore_client.collection(ROOMS_COLLECTION)
+    rooms = home_info['rooms']
+    for room in rooms:
+        rooms_collection_ref.document(str(room['id'])).set(room)
 
+    devices_collection_ref = firestore_client.collection(DEVICES_COLLECTION)
+    devices = home_info['devices']
+    for device in devices:
+        devices_collection_ref.document(str(device['id'])).set(device)
+
+def init_heating_settings(firestore_client) -> None:
+    homes = firestore_client.collection(HOMES_COLLECTION).stream() 
+    default_settings = get_default_heating_settings()
+    for home in homes:
+        settings = firestore_client.collection(HEATING_SETTINGS_COLLECTION).document(home.id).get()
+        if not settings.exists:
+            firestore_client.collection(HEATING_SETTINGS_COLLECTION).document(home.id).set(default_settings.to_dict())
+
+def get_heating_settings(firestore_client) -> HeatingSettings:
+    # expect only one document currently
+    heating_settings = next(firestore_client.collection(HEATING_SETTINGS_COLLECTION).stream())
+    return heating_settings_from_dict(heating_settings)
+
+def get_rooms(firestore_client):
+    return firestore_client.collection(ROOMS_COLLECTION).stream()

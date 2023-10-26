@@ -2,26 +2,33 @@ import sanction
 import requests
 from datetime import datetime
 
+from lib.adax.models.api_credentials import ApiCredentials
+
 API_URL = "https://api-1.adax.no/client-api"
 
 oauthClinet = sanction.Client(token_endpoint = API_URL + '/auth/token')
 
 class AdaxClient:
-    def __init__(self, credentials: str, account_id: str):
+    credentials: ApiCredentials
+
+    def __init__(self, credentials: ApiCredentials):
         self.credentials = credentials
-        self.account_id = account_id
 
     def get_token(self):
         # Authenticate and obtain JWT token
-        oauthClinet.request_token(grant_type = 'password', username = self.account_id, password = self.credentials)
+        oauthClinet.request_token(
+            grant_type = 'password', 
+            username = self.credentials.clientId, 
+            password = self.credentials.credentials
+        )
         return oauthClinet.access_token
 
     def refresh_token(self):
         oauthClinet.request_token(
             grant_type='refresh_token', 
             refresh_token = oauthClinet.refresh_token, 
-            username = self.account_id, 
-            password = self.credentials
+            username = self.credentials.clientId, 
+            password = self.credentials.credentials
         )
         return oauthClinet.access_token
 
@@ -51,7 +58,7 @@ class AdaxClient:
             energy = log['energyWh']
             print("From: %15s, To: %15s, %5dwh" % (fromTime, toTime, energy))
 
-    def get_house_info(self, token) -> (dict, int):
+    def get_home_data(self, token) -> (dict, int):
         response = requests.get(API_URL + "/rest/v1/content/?withEnergy=1", headers = self.get_headers(token))
         if (response.status_code == 200):
             return response.json(), response.status_code

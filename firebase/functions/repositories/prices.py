@@ -16,3 +16,10 @@ def get_price_for_next_hour(firestore_client) -> (float | None):
     price = float(doc.get('price'))
     print(f"Price for {key} is {price}")
     return price
+
+def store_prices(prices: list[Price], firestore_client) -> None:
+    for price in prices:
+        price_key = price.get_price_key()
+        docref = firestore_client.collection(PRICES_COLLECTION).document(price_key)
+        docref.set({"price" : price.price })
+        print(f"Added price {price.price} for {price.get_price_key()}")
