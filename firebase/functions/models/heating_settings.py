@@ -21,12 +21,12 @@ class HeatingSettings:
 
 def heating_settings_from_dict(source: dict) -> HeatingSettings:
     return HeatingSettings(
-        source['maxPrice'], 
-        source['lowPrice'], 
-        source['heatingEnabled'], 
-        source['heatingMaxTemperature'], 
-        source['heatingMinTemperature'], 
-        source['heatingMidTemperature']
+        int(source['maxPrice']), 
+        int(source['lowPrice']), 
+        bool(source['heatingEnabled']), 
+        int(source['heatingMaxTemperature']), 
+        int(source['heatingMinTemperature']), 
+        int(source['heatingMidTemperature'])
     )
 
 def get_default_heating_settings() -> HeatingSettings:
