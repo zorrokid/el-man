@@ -58,14 +58,3 @@ def print_home_info(home_info: dict):
             energy = device['energyWh'];
             energyTime = datetime.utcfromtimestamp(int(device['energyTime']) / 1000)
             print("Device: %15s, Time: %15s, Energy: %5dwh, id: %5d" % (deviceName, energyTime, energy, device ['id']))
-
-def get_target_temperature(price: float):
-    current_temperature = 10 # get current temperature
-    get_target_temperature = 15 # get target temperature
-
-    new_temperature = current_temperature # calculate baed on current temperature and price for next few hours
-    # for example: 
-    # if price for next few hours is low, increase temperature gradually
-    # if price is low for next hour but rises after that then increase temperature high for next hour
-    # if price for next few hours is high, decrease temperature fast
-    # if price exceeds some threshold, turn off heating
