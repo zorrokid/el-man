@@ -11,19 +11,18 @@ def set_target_temperatures(rooms: list[Room], price: float, settings: HeatingSe
     token = client.get_token()
 
     print(f"Max price  is {settings.maxPrice}")
+
     for room in rooms:
         print(f"Setting heaters for room {room.id}")
         if price is None or price > settings.maxPrice:
-            print(f"Price is not available or or exceed maximum limit {settings.maxPrice}, so turning heating off")
-            client.set_heating_enabled(room.id, False, token)
-        elif price < settings.lowPrice:
-            print(f"Price {price} is lower than min price {settings.minPrice}, so turning heating to max temperature")
-            client.set_room_target_temperature(room.id, settings.heatingMaxTemperature * 100, token)
-        else:
-            # TODO get target temperature from firestore
-            # house info should be updated every hour
-            print(f"Price {price} is lower than max price {settings.maxPrice}, so turning heating on")
-            client.set_room_target_temperature(room.id, settings.heatingMidTemperature * 100, token)
+            print(f"Price is not available or or exceed maximum limit {settings.maxPrice}, keeping heating off or turning heating off.")
+            if room.heatingEnabled == True: 
+                client.set_heating_enabled(room.id, False, token)
+        else: 
+            newTargetTemperature = settings.heatingMaxTemperature if price < settings.lowPrice else settings.heatingMidTemperature
+            print(f"Price {price} is lower than max price {settings.maxPrice}, so turning heating on or keeping heating on. Target temperature is {newTargetTemperature}.")
+            if room.targetTemperature != newTargetTemperature:
+                client.set_room_target_temperature(room.id, newTargetTemperature * 100, token)
 
 def set_enabled(rooms, enabled: bool, adax_api_credentials: ApiCredentials) -> None:
     client = get_client(adax_api_credentials)
