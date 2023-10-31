@@ -6,7 +6,7 @@ from lib.adax.models.api_credentials import ApiCredentials
 from lib.adax.models.room import room_from_dict
 
 from repositories.prices import get_price_for_next_hour, store_prices
-from services.day_ahead_prices_service import get_day_ahead_prices
+from services.day_ahead_prices import get_day_ahead_prices
 
 from services.heater_management import get_home_data, set_enabled, set_target_temperatures
 from repositories.home_repository import get_heating_settings, get_rooms, store_current_room_state, store_homes
@@ -19,11 +19,12 @@ UTC_DIFF = IntParam("UTC_DIFF") # 3
 ADAX_API_CREDENTIALS = SecretParam("ADAX_API_CREDENTIALS")
 ADAX_CLIENT_ID = SecretParam("ADAX_CLIENT_ID")
 
-DAYAHEAD_PRICE_FETCH_SCHDULE = "every day 19:40"
+FETCH_DAYAHEAD_PRICES_SCHEDULE = "every day 19:40"
+SET_TARGET_TEMPERATURES_SCHEDULE = "58 * * * *"
 
 initialize_app()
 
-@scheduler_fn.on_schedule(schedule=DAYAHEAD_PRICE_FETCH_SCHDULE, region="europe-central2", secrets=[ENTSO_E_TOKEN])
+@scheduler_fn.on_schedule(schedule=FETCH_DAYAHEAD_PRICES_SCHEDULE, region="europe-central2", secrets=[ENTSO_E_TOKEN])
 def fetch_day_ahead_prices(req: https_fn.Request) -> None:
     _fetch_day_ahead_prices(ENTSO_E_TOKEN.value, EIC_CODE.value, VAT_PERCENTAGE.value)
 
@@ -39,9 +40,8 @@ def _fetch_day_ahead_prices(entso_e_token, eic_code, vat_percentage):
     store_prices(prices, firestore.client())
     print("Finished fetching day ahead prices...")
 
-EVERY_HOUR = "58 * * * *"
 
-@scheduler_fn.on_schedule(schedule=EVERY_HOUR, region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
+@scheduler_fn.on_schedule(schedule=SET_TARGET_TEMPERATURES_SCHEDULE, region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
 def set_temperatures(req: https_fn.Request) -> None:
     _set_temperatures(ApiCredentials(ADAX_API_CREDENTIALS.value, ADAX_CLIENT_ID.value))
 
