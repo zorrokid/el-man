@@ -1,7 +1,6 @@
-from firebase_admin import firestore
 from datetime import datetime
 from models.price import Price
-from services.constants import PRICES_COLLECTION
+from repositories.firestore_collection_constants import PRICES_COLLECTION
 
 def get_price_for_next_hour(firestore_client) -> (float | None):
     now = datetime.now()
