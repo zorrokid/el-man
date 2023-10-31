@@ -28,24 +28,21 @@ initialize_app()
 def fetch_day_ahead_prices(req: https_fn.Request) -> None:
     _fetch_day_ahead_prices(ENTSO_E_TOKEN.value, EIC_CODE.value, VAT_PERCENTAGE.value)
 
-# for local emulator testing purposes
+# https trigger for local emulator testing purposes
 @https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
 def fetch_day_ahead_prices_http(req: https_fn.Request) -> https_fn.Response:
     _fetch_day_ahead_prices(ENTSO_E_TOKEN.value, EIC_CODE.value, VAT_PERCENTAGE.value) 
     return https_fn.Response("OK") 
 
 def _fetch_day_ahead_prices(entso_e_token, eic_code, vat_percentage):
-    print("Fetching day ahead prices...")
     prices = get_day_ahead_prices(entso_e_token, eic_code, vat_percentage)
     store_prices(prices, firestore.client())
-    print("Finished fetching day ahead prices...")
-
 
 @scheduler_fn.on_schedule(schedule=SET_TARGET_TEMPERATURES_SCHEDULE, region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
 def set_temperatures(req: https_fn.Request) -> None:
     _set_temperatures(ApiCredentials(ADAX_API_CREDENTIALS.value, ADAX_CLIENT_ID.value))
 
-# for local emulator testing purposes
+# https trigger for local emulator testing purposes
 @https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
 def set_temperatures_http(req: https_fn.Request) -> https_fn.Response:
     _set_temperatures(ApiCredentials(ADAX_API_CREDENTIALS.value, ADAX_CLIENT_ID.value))
@@ -60,11 +57,9 @@ def _set_temperatures(credentials):
 
     firestore_client = firestore.client()
     store_current_room_state(firestore_client, rooms)
-
     heating_settings = get_heating_settings(firestore_client)
-
     price = get_price_for_next_hour(firestore_client)
-    set_target_temperatures(rooms, price, heating_settings, ApiCredentials(ADAX_API_CREDENTIALS.value, ADAX_CLIENT_ID.value))
+    set_target_temperatures(rooms, price, heating_settings, credentials)
 
 @https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
 def set_heating_enabled(req: https_fn.Request) -> https_fn.Response:
