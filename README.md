@@ -4,7 +4,7 @@ This application is for managing electrical heating thermostates based on hourly
 
 Currently implemented:
 - Fetching day ahead prices from [ENTSO-E Transparency Platorm](https://transparency.entsoe.eu/) using their RESTful API
-- Managing Adax thermostates using their [RESTful API](https://api-1.adax.no/client-api/)
+- Managing Adax thermostates using their [RESTful API](https://adax.no/en/wi-fi/api-development/)
 - Storing data to Firebase Firestore
 - Google Cloud Functions for triggering fetching day ahead prices and managing target temperature based on hourly prices
 
