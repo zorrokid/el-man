@@ -27,9 +27,7 @@ class EntsoEDataFetcher:
 
     def get_dayahead_data(self, eic_code) -> str:
         date_from = datetime.now()
-        print("Fetching day ahead prices for", date_from)
         date_to = date_from + timedelta(days=1)
-        print("Fetching day ahead prices until", date_to)
         url = self.get_url(date_from, date_to, eic_code)
         r = requests.get(url)
         if r.status_code != 200:

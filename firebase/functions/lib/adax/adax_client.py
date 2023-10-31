@@ -38,7 +38,6 @@ class AdaxClient:
     def set_heating_enabled(self, roomId, enabled: bool, token) -> bool:
         json = { 'rooms': [{ 'id': roomId, 'heatingEnabled': str(enabled) }] }
         response = requests.post(API_URL + '/rest/v1/control/', json = json, headers = self.get_headers(token))
-        print(response)
         return response.status_code == 200
 
     def set_room_target_temperature(self, roomId, temperature, token) -> bool:
@@ -46,7 +45,6 @@ class AdaxClient:
         # Sets target temperature of the room
         json = { 'rooms': [{ 'id': roomId, 'targetTemperature': str(temperature), 'heatingEnabled': 'true' }] }
         response = requests.post(API_URL + '/rest/v1/control/', json = json, headers = self.get_headers(token))
-        print(response)
         return response.status_code == 200
 
     def get_energy_info(self, token, roomId):

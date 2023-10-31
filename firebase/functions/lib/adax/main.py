@@ -14,6 +14,5 @@ if __name__ == '__main__':
     
     client = AdaxClient(credentials, account_id)
     token = client.get_token()
-    print(token)
     client.get_homes_info(token)
 

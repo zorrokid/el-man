@@ -5,15 +5,10 @@ from models.heating_settings import HeatingSettings
 from datetime import datetime
 
 def set_target_temperatures(rooms: list[Room], price: float, settings: HeatingSettings, adax_api_credentials: ApiCredentials) -> None:
-    print("Starting set_heaters")
-    
     client = get_client(adax_api_credentials)
     token = client.get_token()
 
-    print(f"Max price  is {settings.maxPrice}")
-
     for room in rooms:
-        print(f"Setting heaters for room {room.id}")
         if price is None or price > settings.maxPrice:
             print(f"Price is not available or or exceed maximum limit {settings.maxPrice}, keeping heating off or turning heating off.")
             if room.heatingEnabled == True: 
@@ -55,6 +50,6 @@ def print_home_info(home_info: dict):
     if ('devices' in home_info):
         for device in home_info['devices']:
             deviceName = device['name']
-            energy = device['energyWh'];
+            energy = device['energyWh']
             energyTime = datetime.utcfromtimestamp(int(device['energyTime']) / 1000)
             print("Device: %15s, Time: %15s, Energy: %5dwh, id: %5d" % (deviceName, energyTime, energy, device ['id']))
