@@ -1,6 +1,6 @@
 # el-man
 
-This application is for managing electrical heating thermostates based on hourly electricity prices.
+This application is for managing electric heating thermostates based on hourly electricity prices.
 
 Currently implemented:
 - Fetching day ahead prices from [ENTSO-E Transparency Platorm](https://transparency.entsoe.eu/) using their RESTful API
