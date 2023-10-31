@@ -1,8 +1,25 @@
+from firebase_admin import firestore
 from lib.adax.adax_client import AdaxClient
 from lib.adax.models.api_credentials import ApiCredentials
-from lib.adax.models.room import Room
+from lib.adax.models.room import Room, room_from_dict
 from models.heating_settings import HeatingSettings
 from datetime import datetime
+
+from repositories.home_repository import get_heating_settings, store_current_room_state, store_homes
+from repositories.prices import get_price_for_next_hour
+
+def set_room_target_temperatures(credentials):
+    home_data = get_home_data(credentials) 
+    rooms_data = home_data['rooms']
+    rooms = []
+    for room_data in rooms_data:
+        rooms.append(room_from_dict(room_data))
+
+    firestore_client = firestore.client()
+    store_current_room_state(firestore_client, rooms)
+    heating_settings = get_heating_settings(firestore_client)
+    price = get_price_for_next_hour(firestore_client)
+    set_target_temperatures(rooms, price, heating_settings, credentials)
 
 def set_target_temperatures(rooms: list[Room], price: float, settings: HeatingSettings, adax_api_credentials: ApiCredentials) -> None:
     client = get_client(adax_api_credentials)
@@ -31,6 +48,11 @@ def get_home_data(adax_api_credentials: ApiCredentials):
     token = client.get_token()
     (home_data, _) = client.get_home_data(token)
     return home_data
+
+def get_and_store_home_data(adax_api_credentials: ApiCredentials):
+    home_data_json = get_home_data(adax_api_credentials) 
+    db = firestore.client()
+    store_homes(db, home_data_json)
 
 def get_client(api_credentials: ApiCredentials) -> AdaxClient:
     return AdaxClient(api_credentials)
