@@ -1,11 +1,13 @@
 from firebase_admin import firestore
+from domain.target_temperature import calculate_target_temperature
 from lib.adax.adax_client import AdaxClient
+from lib.adax.models.adax_temperature import AdaxTemperature
 from lib.adax.models.api_credentials import ApiCredentials
 from lib.adax.models.room import Room, room_from_dict
 from models.heating_settings import HeatingSettings
 from datetime import datetime
 
-from repositories.home_repository import get_heating_settings, store_current_room_state, store_homes
+from repositories.home import get_heating_settings, store_current_room_state, store_homes
 from repositories.prices import get_price_for_next_hour
 
 def set_room_target_temperatures(credentials):
@@ -24,17 +26,12 @@ def set_room_target_temperatures(credentials):
 def set_target_temperatures(rooms: list[Room], price: float, settings: HeatingSettings, adax_api_credentials: ApiCredentials) -> None:
     client = get_client(adax_api_credentials)
     token = client.get_token()
-
     for room in rooms:
-        if price is None or price > settings.maxPrice:
-            print(f"Price is not available or or exceed maximum limit {settings.maxPrice}, keeping heating off or turning heating off.")
-            if room.heatingEnabled == True: 
-                client.set_heating_enabled(room.id, False, token)
-        else: 
-            newTargetTemperature = settings.heatingMaxTemperature if price < settings.lowPrice else settings.heatingMidTemperature
-            print(f"Price {price} is lower than max price {settings.maxPrice}, so turning heating on or keeping heating on. Target temperature is {newTargetTemperature}.")
-            if room.targetTemperature != newTargetTemperature:
-                client.set_room_target_temperature(room.id, newTargetTemperature * 100, token)
+        (heatingEnabled, targetTemperature) = calculate_target_temperature(price, settings)
+        if heatingEnabled == False and room.heatingEnabled == True:
+            client.set_heating_enabled(room.id, False, token)
+        elif heatingEnabled == True and room.targetTemperature != targetTemperature: 
+            client.set_room_target_temperature(room.id, AdaxTemperature(targetTemperature), token)
 
 def set_enabled(rooms, enabled: bool, adax_api_credentials: ApiCredentials) -> None:
     client = get_client(adax_api_credentials)
@@ -61,11 +58,11 @@ def print_home_info(home_info: dict):
     for room in home_info['rooms']:
         roomName = room['name']
         if ('targetTemperature' in room):
-            targetTemperature = room['targetTemperature'] / 100.0
+            targetTemperature = AdaxTemperature(room['targetTemperature']).to_celsius()
         else:
             targetTemperature = 0
         if ('temperature' in room):
-            currentTemperature = room['temperature'] / 100.0
+            currentTemperature = AdaxTemperature(room['temperature']).to_celsius()
         else:
             currentTemperature = 0
         print("Room: %15s, Target: %5.2fC, Temperature: %5.2fC, id: %5d" % (roomName, targetTemperature, currentTemperature, room['id']))

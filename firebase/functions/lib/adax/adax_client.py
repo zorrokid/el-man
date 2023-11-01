@@ -1,6 +1,7 @@
 import sanction
 import requests
 from datetime import datetime
+from lib.adax.models.adax_temperature import AdaxTemperature
 
 from lib.adax.models.api_credentials import ApiCredentials
 
@@ -40,10 +41,9 @@ class AdaxClient:
         response = requests.post(API_URL + '/rest/v1/control/', json = json, headers = self.get_headers(token))
         return response.status_code == 200
 
-    def set_room_target_temperature(self, roomId, temperature, token) -> bool:
+    def set_room_target_temperature(self, roomId, temperature: AdaxTemperature, token) -> bool:
         print(f"Setting target temperature for room {roomId} to {temperature}")
-        # Sets target temperature of the room
-        json = { 'rooms': [{ 'id': roomId, 'targetTemperature': str(temperature), 'heatingEnabled': 'true' }] }
+        json = { 'rooms': [{ 'id': roomId, 'targetTemperature': str(temperature.value), 'heatingEnabled': 'true' }] }
         response = requests.post(API_URL + '/rest/v1/control/', json = json, headers = self.get_headers(token))
         return response.status_code == 200
 
