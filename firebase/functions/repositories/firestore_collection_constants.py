@@ -1,3 +1,4 @@
+"""Contains constants for the names of the collections in the Firestore database."""
 PRICES_COLLECTION = "DayAheadPrices"
 HOMES_COLLECTION = "Homes"
 ROOMS_COLLECTION = "Rooms"
