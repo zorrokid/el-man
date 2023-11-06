@@ -1,12 +1,12 @@
 """Repository for prices"""
-from datetime import datetime
+from datetime import datetime, timedelta
 from models.price import Price
 from repositories.firestore_collection_constants import PRICES_COLLECTION
 
-def get_price_for_next_hour(firestore_client) -> (float | None):
+def get_price_for_next_hour_of(firestore_client, time: datetime) -> (float | None):
     """Gets price for next hour from Firestore database."""
-    now = datetime.now()
-    key = Price.create_price_key(now)
+    next_hour = time + timedelta(hours=1)
+    key = Price.create_price_key(next_hour)
     price_ref = firestore_client.collection(PRICES_COLLECTION).document(key)
     doc = price_ref.get()
 

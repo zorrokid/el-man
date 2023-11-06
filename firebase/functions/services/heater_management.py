@@ -13,7 +13,7 @@ from models.heating_settings import HeatingSettings
 from repositories.heating_settings import get_heating_settings
 
 from repositories.home import store_current_room_state, store_homes
-from repositories.prices import get_price_for_next_hour
+from repositories.prices import get_price_for_next_hour_of
 
 def set_room_target_temperatures(credentials):
     """Sets target temperatures for rooms based on day-ahead prices and heating settings."""
@@ -29,7 +29,7 @@ def set_room_target_temperatures(credentials):
     firestore_client = firestore.client()
     store_current_room_state(firestore_client, rooms)
     heating_settings = get_heating_settings(firestore_client, heating_setting_ids)
-    price = get_price_for_next_hour(firestore_client)
+    price = get_price_for_next_hour_of(firestore_client, datetime.now())
     set_target_temperatures(rooms, price, heating_settings, credentials)
 
 def set_target_temperatures(rooms: list[Room], price: float,
