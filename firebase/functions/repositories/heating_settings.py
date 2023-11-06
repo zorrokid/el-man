@@ -18,12 +18,12 @@ def get_heating_settings(firestore_client, setting_ids: set) -> dict[str, Heatin
     """Gets heating settings from Firestore database by given id's. 
     Returns a map of id to heating settings."""
     heating_settings_ref = firestore_client.collection(HEATING_SETTINGS_COLLECTION)
-    heating_setttings_map = {}
+    heating_settings_map = {}
     for setting_id in setting_ids:
         heating_settings = heating_settings_ref.document(setting_id).get()
-        if heating_settings is None:
-            print("No heating settings found, using default settings")
-            heating_settings[setting_id] = get_default_heating_settings()
+        if not heating_settings.exists:
+            print(f"No heating settings found with id {setting_id}, using default settings.")
+            heating_settings_map[setting_id] = get_default_heating_settings()
         else:
-            heating_settings[setting_id] = heating_settings_from_dict(heating_settings)
-    return heating_setttings_map
+            heating_settings_map[setting_id] = heating_settings_from_dict(heating_settings.to_dict())
+    return heating_settings_map
