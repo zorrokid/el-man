@@ -6,7 +6,7 @@ from datetime import datetime
 from firebase_admin import firestore
 from domain.target_temperature import calculate_target_temperature
 from lib.adax.adax_client import AdaxClient
-from lib.adax.models.adax_temperature import AdaxTemperature
+from lib.adax.models.adax_temperature import AdaxTemperature, adax_temperature_from_celcius
 from lib.adax.models.api_credentials import ApiCredentials
 from lib.adax.models.room import Room, room_from_dict
 from models.heating_settings import HeatingSettings
@@ -36,10 +36,11 @@ def set_target_temperatures(rooms: list[Room], price: float, settings: HeatingSe
     token = client.get_token()
     for room in rooms:
         (heating_enabled, target_temperature) = calculate_target_temperature(price, settings)
+        adax_temperature = adax_temperature_from_celcius(target_temperature)
         if heating_enabled is False and room.heating_enabled is True:
             client.set_heating_enabled(room.id, False, token)
-        elif heating_enabled is True and room.target_temperature != target_temperature:
-            client.set_room_target_temperature(room.id, AdaxTemperature(target_temperature), token)
+        elif heating_enabled is True and room.target_temperature != adax_temperature:
+            client.set_room_target_temperature(room.id, adax_temperature, token)
 
 def set_enabled(rooms, enabled: bool, adax_api_credentials: ApiCredentials) -> None:
     """Sets heating enabled/disabled using Adax API client."""
