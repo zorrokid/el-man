@@ -1,6 +1,13 @@
 """Contains HeatingSettings classi and helper functions."""
 from dataclasses import dataclass
 
+DEFAULT_MAX_PRICE = 5
+DEFAULT_MIN_PRICE = 2
+DEFAULT_HEATING_ENABLED = True
+DEFAULT_MAX_TEMPERATURE = 20
+DEFAULT_MIN_TEMPERATURE = 5
+DEFAULT_MID_TEMPERATURE = 10
+
 @dataclass
 class HeatingSettings:
     """Represents heating settings."""
@@ -35,4 +42,11 @@ def heating_settings_from_dict(source: dict) -> HeatingSettings:
 
 def get_default_heating_settings() -> HeatingSettings:
     """Returns default heating settings."""
-    return HeatingSettings(5, 2, True, 20, 5, 10)
+    return HeatingSettings(
+        DEFAULT_MAX_PRICE,
+        DEFAULT_MIN_PRICE,
+        DEFAULT_HEATING_ENABLED,
+        DEFAULT_MAX_TEMPERATURE,
+        DEFAULT_MIN_TEMPERATURE,
+        DEFAULT_MID_TEMPERATURE
+    )
