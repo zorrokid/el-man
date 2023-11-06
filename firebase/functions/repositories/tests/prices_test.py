@@ -8,10 +8,9 @@ from repositories.prices import get_price_for_next_hour_of
 
 
 class PricesTest(TestCase):
-    """Unit tests for the prices repository."""
+    """Unit tests for the prices repository functions."""
     def test_get_price_for_next_hour_of(self):
-        """Test that prices are fetched correctly from Firestore 
-        and all the needed fields are populated."""
+        """Test that function returns correct price for next hour."""
 
         # Arrange
         now = datetime(2023, 1, 1, 12, 30, 0) # 2023-01-01 12:30:00
