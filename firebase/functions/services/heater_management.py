@@ -20,21 +20,26 @@ def set_room_target_temperatures(credentials):
     home_data = get_home_data(credentials)
     rooms_data = home_data['rooms']
     rooms = []
+    heating_setting_ids = set()
     for room_data in rooms_data:
-        rooms.append(room_from_dict(room_data))
+        room = room_from_dict(room_data)
+        rooms.append(room)
+        heating_setting_ids.add(room.heating_settings_id)
 
     firestore_client = firestore.client()
     store_current_room_state(firestore_client, rooms)
-    heating_settings = get_heating_settings(firestore_client)
+    heating_settings = get_heating_settings(firestore_client, heating_setting_ids)
     price = get_price_for_next_hour(firestore_client)
     set_target_temperatures(rooms, price, heating_settings, credentials)
 
-def set_target_temperatures(rooms: list[Room], price: float, settings: HeatingSettings,
+def set_target_temperatures(rooms: list[Room], price: float,
+                            heating_settings: dict[str, HeatingSettings],
                             adax_api_credentials: ApiCredentials) -> None:
     """Sets target temperatures using Adax API client."""
     client = get_client(adax_api_credentials)
     token = client.get_token()
     for room in rooms:
+        settings = heating_settings[room.heating_settings_id]
         (heating_enabled, target_temperature) = calculate_target_temperature(price, settings)
         if heating_enabled is False and room.heating_enabled is True:
             client.set_heating_enabled(room.id, False, token)
