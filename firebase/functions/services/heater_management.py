@@ -39,7 +39,7 @@ def set_target_temperatures(rooms: list[AdaxRoom], price: float,
     client = get_client(adax_api_credentials)
     token = client.get_token()
     for room in rooms:
-        settings = heating_settings[room.heating_settings_id]
+        settings = heating_settings[room.id]
         (heating_enabled, target_temperature) = calculate_target_temperature(price, settings)
         adax_temperature = adax_temperature_from_celcius(target_temperature)
         print(f"Room: {room.name}, Target: {target_temperature}°C, "
