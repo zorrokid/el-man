@@ -1,13 +1,14 @@
 """Home repository module."""
 import time
 from typing import List
-from lib.adax.models.room import Room
+from lib.adax.models.adax_room import AdaxRoom
+from models.room import room_from_dict
 from repositories.firestore_collection_constants import DEVICES_COLLECTION
 from repositories.firestore_collection_constants import HOMES_COLLECTION
 from repositories.firestore_collection_constants import ROOM_STATE_COLLECTION
 from repositories.firestore_collection_constants import ROOMS_COLLECTION
 
-def store_current_room_state(firestore_client, rooms: List[Room]) -> None:
+def store_current_room_state(firestore_client, rooms: List[AdaxRoom]) -> None:
     """Stores current room state in Firestore database."""
     utc_unix_time = int(time.time())
     for room in rooms:
@@ -38,6 +39,10 @@ def store_homes(firestore_client, home_info):
     for device in devices:
         devices_collection_ref.document(str(device['id'])).set(device)
 
-def get_rooms(firestore_client):
-    """Gets rooms from Firestore database."""
-    return firestore_client.collection(ROOMS_COLLECTION).stream()
+def get_rooms(firestore_client) -> dict[str, AdaxRoom]:
+    """Gets rooms from Firestore database and returns a map of id to room."""
+    rooms = {}
+    rooms_stream = firestore_client.collection(ROOMS_COLLECTION).stream()
+    for room in rooms_stream:
+        rooms[room.id] = room_from_dict(room.to_dict())
+    return rooms

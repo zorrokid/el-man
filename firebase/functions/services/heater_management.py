@@ -8,9 +8,9 @@ from domain.target_temperature import calculate_target_temperature
 from lib.adax.adax_client import AdaxClient
 from lib.adax.models.adax_temperature import AdaxTemperature, adax_temperature_from_celcius
 from lib.adax.models.api_credentials import ApiCredentials
-from lib.adax.models.room import Room, room_from_dict
-from models.heating_settings import HeatingSettings
-from repositories.heating_settings import get_heating_settings
+from lib.adax.models.adax_room import AdaxRoom, adax_room_from_dict
+from models.heating_settings import HeatingSettings, get_default_heating_settings
+from repositories.heating_settings import get_heating_settings, init_heating_settings
 
 from repositories.home import store_current_room_state, store_homes
 from repositories.prices import get_price_for_next_hour_of
@@ -20,19 +20,19 @@ def set_room_target_temperatures(credentials):
     home_data = get_home_data(credentials)
     rooms_data = home_data['rooms']
     rooms = []
-    heating_setting_ids = set()
+    room_ids = set()
     for room_data in rooms_data:
-        room = room_from_dict(room_data)
+        room = adax_room_from_dict(room_data)
         rooms.append(room)
-        heating_setting_ids.add(room.heating_settings_id)
+        room_ids.add(room.id)
 
     firestore_client = firestore.client()
     store_current_room_state(firestore_client, rooms)
-    heating_settings = get_heating_settings(firestore_client, heating_setting_ids)
+    heating_settings = get_heating_settings(firestore_client, room_ids)
     price = get_price_for_next_hour_of(firestore_client, datetime.now())
     set_target_temperatures(rooms, price, heating_settings, credentials)
 
-def set_target_temperatures(rooms: list[Room], price: float,
+def set_target_temperatures(rooms: list[AdaxRoom], price: float,
                             heating_settings: dict[str, HeatingSettings],
                             adax_api_credentials: ApiCredentials) -> None:
     """Sets target temperatures using Adax API client."""
@@ -76,6 +76,12 @@ def get_and_store_home_data(adax_api_credentials: ApiCredentials) -> None:
 def get_client(api_credentials: ApiCredentials) -> AdaxClient:
     """Create Adax API client."""
     return AdaxClient(api_credentials)
+
+def init_settings() -> None:
+    """Initializes heating settings for all rooms missing settings."""
+    default_settings = get_default_heating_settings()
+    db = firestore.client()
+    init_heating_settings(db, default_settings)
 
 def print_home_info(home_info: dict) -> None:
     """Print home info for debugging."""

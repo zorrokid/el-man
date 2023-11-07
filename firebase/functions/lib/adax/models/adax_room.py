@@ -2,24 +2,22 @@
 from dataclasses import dataclass
 
 @dataclass
-class Room:
-    """Represents room in Adax API. Also includes heating settings id for the room."""
+class AdaxRoom:
+    """Represents room in Adax API."""
     id: int
     home_id: int
     name: str
     heating_enabled: bool
     temperature: int
     target_temperature: int | None
-    heating_settings_id: str | None
 
-def room_from_dict(source: dict) -> Room:
+def adax_room_from_dict(source: dict) -> AdaxRoom:
     """Converts dictionary to Room."""
-    return Room(
+    return AdaxRoom(
         source['id'],
         source['homeId'],
         source['name'],
         source['heatingEnabled'],
         source['temperature'],
         source['targetTemperature'] if 'targetTemperature' in source else None,
-        source['heatingSettingsId'] if 'heatingSettingsId' in source else None
     )

@@ -4,7 +4,8 @@ from firebase_functions.params import StringParam, IntParam, SecretParam
 from firebase_admin import initialize_app
 from lib.adax.models.api_credentials import ApiCredentials
 from services.day_ahead_prices import fetch_and_store_day_ahead_prices
-from services.heater_management import get_and_store_home_data, set_room_target_temperatures
+from services.heater_management import get_and_store_home_data, init_settings
+from services.heater_management import set_room_target_temperatures
 
 ENTSO_E_TOKEN = SecretParam("ENTSO_E_TOKEN")
 EIC_CODE = StringParam('EIC_CODE') # '10YFI-1--------U'
@@ -29,8 +30,6 @@ def set_temperatures(_: https_fn.Request) -> None:
     """Sets target temperatures for rooms based on day-ahead prices and heating settings."""
     set_room_target_temperatures(ApiCredentials(ADAX_API_CREDENTIALS.value, ADAX_CLIENT_ID.value))
 
-# https triggers for local emulator testing purposes
-
 @https_fn.on_request(region="europe-central2", secrets=[ADAX_API_CREDENTIALS, ADAX_CLIENT_ID])
 def fetch_day_ahead_prices_http(_: https_fn.Request) -> https_fn.Response:
     """Fetches and stores day ahead prices."""
@@ -47,4 +46,10 @@ def set_temperatures_http(_: https_fn.Request) -> https_fn.Response:
 def get_house_info(_: https_fn.Request) -> https_fn.Response:
     """Gets and stores home data using Adax API client."""
     get_and_store_home_data(ApiCredentials(ADAX_API_CREDENTIALS.value, ADAX_CLIENT_ID.value))
+    return https_fn.Response("OK")
+
+@https_fn.on_request(region="europe-central2")
+def initialize_settings(_: https_fn.Request) -> https_fn.Response:
+    """Initialized heating settings with default values for room if room hasn't got settings yet."""
+    init_settings()
     return https_fn.Response("OK")
