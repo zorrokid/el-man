@@ -2,14 +2,17 @@
 from models.heating_settings import HeatingSettings, get_default_heating_settings
 from models.heating_settings import heating_settings_from_dict
 from repositories.firestore_collection_constants import HEATING_SETTINGS_COLLECTION
+from repositories.firestore_collection_constants import ROOMS_COLLECTION
 
 def init_heating_settings(firestore_client, default_settings: HeatingSettings) -> None:
     """Initializes heating settings for all rooms."""
-    rooms = firestore_client.collection('rooms').stream()
+    rooms = firestore_client.collection(ROOMS_COLLECTION).stream()
     heating_settings_ref = firestore_client.collection(HEATING_SETTINGS_COLLECTION)
+
     for room in rooms:
         settings = heating_settings_ref.document(room.id).get()
         if not settings.exists:
+            print(f"No heating settings found for room {room.id} initializing with default settings.")
             heating_settings_ref.document(room.id).set(default_settings.to_dict())
 
 def get_heating_settings(firestore_client, room_ids: set[str]) -> dict[str, HeatingSettings]:

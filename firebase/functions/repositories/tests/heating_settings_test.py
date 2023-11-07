@@ -59,7 +59,14 @@ class HeatingSettingsTest(TestCase):
         # Arrange
         room_id = '123'
         mock_firestore_client = MockFirestore()
-        mock_firestore_client.collection(ROOMS_COLLECTION).document(room_id).set({})
+        mock_firestore_client.collection(ROOMS_COLLECTION).document(room_id).set({
+            'id': room_id,
+            'homeId': '123',
+            'name': 'test',
+            'temperature': 20,
+            'targetTemperature': 20,
+            'heatingEnabled': True
+        })
         default_heating_settings = get_default_heating_settings()
 
         # Act
@@ -78,7 +85,14 @@ class HeatingSettingsTest(TestCase):
         # Arrange
         room_id = '123'
         mock_firestore_client = MockFirestore()
-        mock_firestore_client.collection(ROOMS_COLLECTION).document(room_id).set({})
+        mock_firestore_client.collection(ROOMS_COLLECTION).document(room_id).set({
+            'id': room_id,
+            'homeId': '123',
+            'name': 'test',
+            'temperature': 20,
+            'targetTemperature': 20,
+            'heatingEnabled': True
+        })
         default_heating_settings = get_default_heating_settings()
         expected_max_price = default_heating_settings.max_price + 1
         mock_firestore_client.collection(HEATING_SETTINGS_COLLECTION).document(room_id).set({
