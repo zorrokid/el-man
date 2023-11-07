@@ -24,7 +24,7 @@ def set_room_target_temperatures(credentials):
     for room_data in rooms_data:
         room = adax_room_from_dict(room_data)
         rooms.append(room)
-        room_ids.add(room.id)
+        room_ids.add(str(room.id))
 
     firestore_client = firestore.client()
     store_current_room_state(firestore_client, rooms)
