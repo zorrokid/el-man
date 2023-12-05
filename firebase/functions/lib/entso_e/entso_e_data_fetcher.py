@@ -33,12 +33,14 @@ class EntsoEDataFetcher:
         """Get day ahead prices for given EIC code"""
         date_from = datetime.now()
         date_to = date_from + timedelta(days=1)
+        print(f"Fetching day ahead prices for EIC code {eic_code} from {date_from} to {date_to}.")
         url = self.get_url(date_from, date_to, eic_code)
         r = requests.get(url, timeout=TIMEOUT_SECONDS)
         if r.status_code != 200:
             error = r.text
             print("Error fetching data from the API", error)
             return None
+        print("Data fetched successfully.")
         return r.text
 
     def date_to_url(self, date: datetime) -> str:
@@ -50,5 +52,5 @@ class EntsoEDataFetcher:
         url = API_URL + '?documentType=A44' + '&in_Domain=' + eic_code + '&out_Domain=' + \
             eic_code + '&periodStart=' + self.date_to_url(date_from) + \
             '&periodEnd=' + \
-            self.date_to_url(date_to) + '&securityToken=' + self.token 
+            self.date_to_url(date_to) + '&securityToken=' + self.token
         return url

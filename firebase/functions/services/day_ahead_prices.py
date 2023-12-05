@@ -7,16 +7,19 @@ from repositories.prices import store_prices
 
 def fetch_and_store_day_ahead_prices(entso_e_token, eic_code, vat_percentage):
     """Fetches and stores day ahead prices."""
+    print("Fetching day ahead prices.")
     prices = get_day_ahead_prices(entso_e_token, eic_code, vat_percentage)
     if not prices:
-        print("No prices fetched")
+        print("No prices fetched.")
         return
+    print(f"Storing prices, got {len(prices)} prices.")
     store_prices(prices, firestore.client())
 
 def get_day_ahead_prices(entso_e_token: str, eic_code: str, vat_percentage: int) -> list[Price]:
     """Gets day ahead prices."""
     data_fetcher = EntsoEDataFetcher(entso_e_token)
     result_str = data_fetcher.get_dayahead_data(eic_code)
+    print("Parsing day ahead prices.")
     data_parser = EntsoEDataParser(result_str)
     prices = data_parser.parse_dayahead_prices(vat_percentage, 0)
     return prices
