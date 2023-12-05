@@ -8,6 +8,9 @@ from repositories.prices import store_prices
 def fetch_and_store_day_ahead_prices(entso_e_token, eic_code, vat_percentage):
     """Fetches and stores day ahead prices."""
     prices = get_day_ahead_prices(entso_e_token, eic_code, vat_percentage)
+    if not prices:
+        print("No prices fetched")
+        return
     store_prices(prices, firestore.client())
 
 def get_day_ahead_prices(entso_e_token: str, eic_code: str, vat_percentage: int) -> list[Price]:

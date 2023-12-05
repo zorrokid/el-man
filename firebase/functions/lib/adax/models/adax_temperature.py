@@ -12,6 +12,7 @@ class AdaxTemperature:
         """Converts temperature to celsius decimal."""
         return self.value / 100.0
 
+
 def adax_temperature_from_celcius(temperature: float) -> AdaxTemperature:
     """Converts temperature from celsius decimal to AdaxTempreature."""
     return AdaxTemperature(int(temperature * 100.0))

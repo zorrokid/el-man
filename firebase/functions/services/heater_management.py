@@ -40,8 +40,11 @@ def set_target_temperatures(rooms: list[AdaxRoom], price: float,
     token = client.get_token()
     for room in rooms:
         #TODO unify room id's to string
-        settings = heating_settings[str(room.id)] if str(room.id) in heating_settings else get_default_heating_settings()
-        (heating_enabled, target_temperature) = calculate_target_temperature(price, settings)
+        settings = heating_settings[
+            str(room.id)] if str(room.id) in heating_settings else get_default_heating_settings()
+        current_temperature = AdaxTemperature(room.temperature).to_celsius()
+        (heating_enabled, target_temperature) = calculate_target_temperature(
+            price, settings, current_temperature)
         adax_temperature = adax_temperature_from_celcius(target_temperature)
         print(f"Room: {room.name}, Target: {target_temperature}°C, "
               "Heating enabled: {heating_enabled}.")
