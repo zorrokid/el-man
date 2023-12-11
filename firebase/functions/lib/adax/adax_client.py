@@ -55,14 +55,14 @@ class AdaxClient:
 
     def set_room_target_temperature(self, room_id, temperature: AdaxTemperature, token) -> bool:
         """Set target temperature for room."""
-        print(f"Setting target temperature for room {room_id} to {temperature}")
+        print(f"Setting target temperature for room {room_id} to {temperature.to_celsius()}C")
         json = { 'rooms': [{
                     'id': room_id, 
                     'targetTemperature': str(temperature.value), 
                     'heatingEnabled': 'true' 
                 }]}
         api_url = self.get_api_url('/rest/v1/control/')
-        response = requests.post(api_url, json = json, headers = self.get_headers(token), 
+        response = requests.post(api_url, json = json, headers = self.get_headers(token),
                                  timeout=TIMEOUT_SECONDS)
         return response.status_code == 200
 

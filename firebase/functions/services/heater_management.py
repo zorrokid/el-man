@@ -53,7 +53,7 @@ def set_target_temperatures(rooms: list[AdaxRoom], price: float,
             client.set_heating_enabled(room.id, False, token)
         elif heating_enabled is True and room.target_temperature != adax_temperature:
             print(f"Changing room {room.name} target temperature from "
-                  "{room.target_temperature}°C to {target_temperature}°C.")
+                  f"{room.target_temperature}°C to {target_temperature}°C.")
             client.set_room_target_temperature(room.id, adax_temperature, token)
 
 def set_enabled(rooms, enabled: bool, adax_api_credentials: ApiCredentials) -> None:
