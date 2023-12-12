@@ -52,8 +52,9 @@ def set_target_temperatures(rooms: list[AdaxRoom], price: float,
             print(f"Disabling heating for room {room.name}.")
             client.set_heating_enabled(room.id, False, token)
         elif heating_enabled is True and room.target_temperature != adax_temperature.value:
+            prev_target_temp_log_str = f"${AdaxTemperature(room.target_temperature).to_celsius()}°C" if room.target_temperature is not None else "None" 
             print(f"Changing room {room.name} target temperature from "
-                  f"{AdaxTemperature(room.target_temperature).to_celsius()}°C to {target_temperature}°C.")
+                  f"{prev_target_temp_log_str} to {target_temperature}°C.")
             client.set_room_target_temperature(room.id, adax_temperature, token)
 
 def set_enabled(rooms, enabled: bool, adax_api_credentials: ApiCredentials) -> None:
@@ -66,7 +67,7 @@ def set_enabled(rooms, enabled: bool, adax_api_credentials: ApiCredentials) -> N
 
 def get_home_data(adax_api_credentials: ApiCredentials) -> dict:
     """Gets home data as dictionary using Adax API client."""
-    client = get_client(adax_api_credentials) 
+    client = get_client(adax_api_credentials)
     token = client.get_token()
     (home_data, _) = client.get_home_data(token)
     return home_data
