@@ -11,7 +11,6 @@ Currently implemented:
 
 # System diagram
 
-
 ```mermaid
 graph LR
     A[Google\n Cloud\n Functions]
@@ -35,6 +34,49 @@ graph LR
 You need a 
 - token to access the [ENTSO-E Transparency Platform RESTful API](https://transparency.entsoe.eu/content/static_content/Static%20content/web%20api/Guide.html)
 - Adax API token and client id
+
+# Dev environment
+
+Install Firebase tools:
+
+`npm install -g firebase-tools`
+
+Install python 3 and virtualenv for python
+
+Create virtual environment in the functions folder
+
+`python3 -m venv venv`
+
+Activate the virtual environment:
+
+`source venv/bin/activate`
+
+Install the dependencies:
+
+`python3 -m pip install -r requirements.txt`
+
+## run with firebase emulation
+
+Set up and download admin credentials key as instructured here:
+- https://firebase.google.com/docs/functions/local-emulator
+
+Export the admin credentials key:
+
+`export GOOGLE_APPLICATION_CREDENTIALS=~/Downloads/el-man-17950-c0c69b5b81ca.json`
+
+Start the emulators
+
+`firebase emulators:start`
+
+Emulator UI will be available at http://127.0.0.1:4000/
+
+
+# Deployment
+
+Assumes firebase project has been initialized.
+
+`firebase deploy`
+
 
 # References
 ## Adax API
