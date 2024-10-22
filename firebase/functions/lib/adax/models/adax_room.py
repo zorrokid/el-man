@@ -18,6 +18,6 @@ def adax_room_from_dict(source: dict) -> AdaxRoom:
         source['homeId'],
         source['name'],
         source['heatingEnabled'],
-        source['temperature'],
+        source['temperature'] if 'temperature' in source else None,
         source['targetTemperature'] if 'targetTemperature' in source else None,
     )
