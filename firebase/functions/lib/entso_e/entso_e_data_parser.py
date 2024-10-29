@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 from typing import List
 from models.price import Price
 
-XML_NAMESPACE = '{urn:iec62325.351:tc57wg16:451-3:publicationdocument:7:0}'
+XML_NAMESPACE = '{urn:iec62325.351:tc57wg16:451-3:publicationdocument:7:3}'
 
 class EntsoEDataParser:
     """Parses ENTSO-E XML data"""
