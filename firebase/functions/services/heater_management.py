@@ -42,19 +42,34 @@ def set_target_temperatures(rooms: list[AdaxRoom], price: float,
         #TODO unify room id's to string
         settings = heating_settings[
             str(room.id)] if str(room.id) in heating_settings else get_default_heating_settings()
-        current_temperature = AdaxTemperature(room.temperature).to_celsius()
-        (heating_enabled, target_temperature) = calculate_target_temperature(
-            price, settings, current_temperature)
-        adax_temperature = adax_temperature_from_celcius(target_temperature)
-        print(f"Room: {room.name}, Target: {target_temperature}°C, "
+        current_temperature_in_celcius = AdaxTemperature(room.temperature).to_celsius()
+        (heating_enabled, target_temperature_in_celcius) = calculate_target_temperature(
+            price, settings, current_temperature_in_celcius)
+        adax_temperature = adax_temperature_from_celcius(target_temperature_in_celcius)
+
+        print(f"Price: {price}.")
+
+        print(f"Settings for room {room.name}: "
+            f"Heating min: {settings.heating_min_temperature}, "
+            f"Heating mid: {settings.heating_mid_temperature}, "
+            f"Heating max: {settings.heating_max_temperature}, "
+            f"Max price: {settings.max_price}, "
+            f"Low price: {settings.low_price}, "
+            f"Heating enabled: {settings.heating_enabled}. ")
+
+        print(f"Room: {room.name}, "
+              f"Current temperature: {current_temperature_in_celcius}°C, "
+              f"Target: {target_temperature_in_celcius}°C, "
               f"Heating enabled: {heating_enabled}.")
+
+
         if heating_enabled is False and room.heating_enabled is True:
             print(f"Disabling heating for room {room.name}.")
             client.set_heating_enabled(room.id, False, token)
         elif heating_enabled is True and room.target_temperature != adax_temperature.value:
             prev_target_temp_log_str = f"${AdaxTemperature(room.target_temperature).to_celsius()}°C" if room.target_temperature is not None else "None" 
             print(f"Changing room {room.name} target temperature from "
-                  f"{prev_target_temp_log_str} to {target_temperature}°C.")
+                  f"{prev_target_temp_log_str} to {target_temperature_in_celcius}°C.")
             client.set_room_target_temperature(room.id, adax_temperature, token)
 
 def set_enabled(rooms, enabled: bool, adax_api_credentials: ApiCredentials) -> None:
