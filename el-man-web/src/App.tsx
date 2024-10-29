@@ -1,21 +1,19 @@
-import { useFirestore } from "./useFirestore";
+import { HeatingSettings } from "./HeatingSettings";
 import { useLogIn } from "./useLogIn";
 
 function App() {
 
-  const { logIn, logOut, isLoggedIn} = useLogIn();
+  const { logIn, logOut, isLoggedIn } = useLogIn();
 
-  // TODO: add authentication + rules to firestore
-  //const { getHeatingSettings } = useFirestore();
-  //console.log(getHeatingSettings());
-  return (
+ return (
     <div className="App">
+      <h1>el-man web</h1>
       {
         isLoggedIn ? <button onClick={logOut}>Log out</button> : <button onClick={logIn}>Log in</button>
-
       }
-      
-      el-man-web
+      {
+        isLoggedIn && <HeatingSettings />
+      }
     </div>
   );
 }

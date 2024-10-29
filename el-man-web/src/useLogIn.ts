@@ -1,9 +1,20 @@
-import { getAuth ,GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { useState } from "react";
+import { getAuth ,GoogleAuthProvider, signInWithPopup, signOut, User } from "firebase/auth";
+import { useEffect, useState } from "react";
 export const useLogIn = () => {
     const [token, setToken] = useState<string | undefined>(undefined);
+    const [user, setUser] = useState<User| undefined>(undefined);
     const auth = getAuth();
     const provider = new GoogleAuthProvider();
+
+    useEffect(() => {
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                setUser(user);
+            } else {
+                setUser(undefined);
+            }
+        });
+    }, [auth]);
 
     const logIn = () => {
         signInWithPopup(auth, provider)
@@ -43,6 +54,6 @@ export const useLogIn = () => {
         });
     }
 
-    return { logIn, logOut, token, isLoggedIn: token !== undefined };
+    return { logIn, logOut, token, isLoggedIn: user !== undefined, user};
 
 }
