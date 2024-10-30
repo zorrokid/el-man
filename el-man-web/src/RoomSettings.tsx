@@ -1,3 +1,4 @@
+import { SettingsEdit } from "./SettingsEdit";
 import { HeatingSettings } from "./useHeatingSettings";
 import { Room } from "./useRooms";
 
@@ -13,7 +14,7 @@ export const RoomSettings = ({ room, settings }: RoomSettingsProps) => {
             {
                 settings === undefined
                     ? <p>No settings found</p>
-                    : <SettingsInfo settings={settings} />
+                    : <SettingsEdit settings={settings} />
             }
         </div>
     );
@@ -33,19 +34,3 @@ export const RoomInfo = ({ room }: RoomInfoProps) => {
     );
 }
 
-type SettingsInfoProps = {
-    settings: HeatingSettings;
-}
-
-export const SettingsInfo = ({ settings }: SettingsInfoProps) => {
-    return (
-        <div>
-            <p>Heating enabled: {settings.heatingEnabled ? 'Yes' : 'No'}</p>
-            <p>Low price: {settings.lowPrice}</p>
-            <p>Max price: {settings.maxPrice}</p>
-            <p>Heating max temperature: {settings.heatingMaxTemperature}</p>
-            <p>Heating min temperature: {settings.heatingMinTemperature}</p>
-            <p>Heating mid temperature: {settings.heatingMidTemperature}</p>
-        </div>
-    );
-}
