@@ -1,13 +1,18 @@
+import { RoomSettings } from "./RoomSettings";
 import { useHeatingSettings } from "./useHeatingSettings";
+import { useRooms } from "./useRooms";
 
 export const HeatingSettings = () => {
-    const {heatingSettings}  = useHeatingSettings();
+    const { heatingSettings, isLoading: isLoadingHeatingSettings } = useHeatingSettings();
+    const { rooms, isLoading: isLoadingRooms } = useRooms();
+    if (isLoadingHeatingSettings || isLoadingRooms) return <p>Loading...</p>;
     return (
         <div>
-            <h2>Heating Settings</h2>
-            <p>{heatingSettings?.map((setting) => <div>{
-                Object.entries(setting).map(([key, value]) => <div>{key}: {value}</div>)
-                }</div>)}</p>
+            {
+                rooms?.map((room) => {
+                    return <RoomSettings room={room} settings={heatingSettings.get(room.id)} />;
+                })
+            }
         </div>
     )
 }
